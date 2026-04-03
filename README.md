@@ -30,7 +30,7 @@ KoneksiDesa adalah platform marketplace modern yang dirancang untuk menjembatani
 
 1.  **Clone repositori ini:**
     ```bash
-    git clone [https://github.com/username/koneksidesa.git](https://github.com/username/koneksidesa.git)
+    git clone [https://github.com/Kader2637/koneksidesa.git](https://github.com/Kader2637/koneksidesa.git)
     ```
 2.  **Masuk ke direktori projek:**
     ```bash
