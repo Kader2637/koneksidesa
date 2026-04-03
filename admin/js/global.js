@@ -1,0 +1,3 @@
+
+window.notif = function(title, text, type='info') { window.dispatchEvent(new CustomEvent('show-toast', { detail: { title, text, type }})); };
+document.addEventListener('DOMContentLoaded', () => { if(window.lucide) lucide.createIcons(); });

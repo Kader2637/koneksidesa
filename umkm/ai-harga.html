@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="id" class="bg-slate-50">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Rekomendasi Harga - Koneksi Desa</title>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap"
+        rel="stylesheet">
+    <script src="js/tailwind-config.js"></script>
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body class="text-slate-800 font-sans antialiased overflow-hidden h-screen flex" x-data="umkmApp()" x-init="initApp()">
+    <!-- Sidebar (Emerald Theme) -->
+    <div class="fixed inset-0 bg-slate-900/50 z-40 lg:hidden" x-show="sidebarOpen" x-transition.opacity
+        @click="sidebarOpen = false" x-cloak></div>
+    <aside
+        class="fixed lg:static inset-y-0 left-0 z-50 w-80 bg-slate-900 text-slate-300 flex flex-col transition-transform duration-300 shadow-2xl lg:shadow-none"
+        :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'">
+        <div
+            class="h-16 flex items-center px-6 bg-emerald-950 border-b border-emerald-900 font-heading font-bold text-xl text-white tracking-tight">
+            Koneksi<span class="text-emerald-500">Desa</span> <span
+                class="ml-2 text-[10px] bg-emerald-800/50 text-emerald-400 px-2 rounded uppercase tracking-widest font-sans border border-emerald-700/50">Mitra</span>
+        </div>
+        <div class="flex-1 overflow-y-auto py-6 px-4 space-y-1">
+            <p class="px-3 text-xs font-bold uppercase tracking-wider text-slate-500 mb-2 mt-2">Insight & Performa</p>
+            <a href="index.html"
+                class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white font-medium transition"><i
+                    data-lucide="pie-chart" class="w-5 h-5"></i> Dashboard Insight Bisnis</a>
+            <p class="px-3 text-xs font-bold uppercase tracking-wider text-slate-500 mb-2 mt-8">Operasional Toko</p>
+            <a href="produk.html"
+                class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white font-medium transition"><i
+                    data-lucide="package" class="w-5 h-5"></i> Manajemen Katalog Produk</a>
+            <a href="ai-harga.html"
+                class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-emerald-600/20 text-emerald-500 font-bold transition border border-emerald-500/20"><i
+                    data-lucide="sparkles" class="w-5 h-5"></i> AI Rekomendasi Harga</a>
+            <a href="pesanan.html"
+                class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white font-medium transition"><i
+                    data-lucide="shopping-cart" class="w-5 h-5"></i> Manajemen Pesanan <span
+                    class="bg-rose-500 text-white rounded-full px-2 text-xs font-bold ml-auto">2</span></a>
+            <p class="px-3 text-xs font-bold uppercase tracking-wider text-slate-500 mb-2 mt-8">Modal & Kelayakan</p>
+            <a href="pinjaman.html"
+                class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white font-medium transition"><i
+                    data-lucide="hand-coins" class="w-5 h-5"></i> Pengajuan Pendanaan</a>
+            <a href="skor.html"
+                class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white font-medium transition"><i
+                    data-lucide="activity" class="w-5 h-5"></i> Monitoring Skor Kelayakan</a>
+            <p class="px-3 text-xs font-bold uppercase tracking-wider text-slate-500 mb-2 mt-8">Komunikasi</p>
+            <a href="chat.html"
+                class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white font-medium transition"><i
+                    data-lucide="message-square" class="w-5 h-5"></i> Chat</a>
+        </div>
+        <div class="p-4 border-t border-slate-800">
+            <a href="../index.html"
+                class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-red-500/10 text-red-500 font-bold transition w-full"><i
+                    data-lucide="log-out" class="w-5 h-5"></i> Tutup Kios</a>
+        </div>
+    </aside>
+    <!-- Main Wrapper -->
+    <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+        <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 z-10 shrink-0">
+            <div class="flex items-center gap-4">
+                <button @click="sidebarOpen = true" class="lg:hidden text-slate-500"><i data-lucide="menu"
+                        class="w-5 h-5"></i></button>
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center"><i
+                            data-lucide="store" class="w-4 h-4"></i></div>
+                    <h1 class="text-xl font-heading font-bold text-slate-900 hidden sm:block">AI Rekomendasi Harga</h1>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <!-- Notification Bell -->
+                <div x-data="{ openNotif: false }" class="relative z-50">
+                    <button @click="openNotif = !openNotif" @click.outside="openNotif = false"
+                        class="relative p-2 text-slate-400 hover:text-emerald-600 transition focus:outline-none cursor-pointer">
+                        <i data-lucide="bell" class="w-5 h-5"></i>
+                        <span
+                            class="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full animate-pulse border border-white"></span>
+                    </button>
+                    <div x-show="openNotif" x-transition.opacity.duration.200ms
+                        class="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden z-[100] text-left"
+                        x-cloak>
+                        <div class="p-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                            <h3 class="font-bold text-slate-900 text-sm">Notifikasi</h3><span
+                                class="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold">3
+                                Baru</span>
+                        </div>
+                        <div class="max-h-80 overflow-y-auto divide-y divide-slate-100">
+                            <a href="chat.html" class="block p-4 hover:bg-slate-50 transition bg-emerald-50/30">
+                                <p class="text-xs font-bold text-slate-900 mb-0.5 flex justify-between">Chat Baru <span
+                                        class="text-[10px] text-emerald-600">Budi S.</span></p>
+                                <p class="text-xs text-slate-500 line-clamp-1">Halo Min, Kopi 1Kg masih ready buat
+                                    dikirim hari ini ga?</p>
+                            </a>
+                            <a href="pesanan.html" class="block p-4 hover:bg-slate-50 transition bg-slate-50/50">
+                                <p class="text-xs font-bold text-slate-900 mb-0.5 flex justify-between">Order #TRX-8291A
+                                    <span class="text-[10px] text-slate-400">2j lalu</span></p>
+                                <p class="text-xs text-slate-500 line-clamp-1">Menunggu diproses kemas oleh Anda.</p>
+                            </a>
+                            <a href="pinjaman.html" class="block p-4 hover:bg-slate-50 transition">
+                                <p class="text-xs font-bold text-slate-900 mb-0.5 flex justify-between">Bursa Modal AI
+                                    <span class="text-[10px] text-slate-400">Kemarin</span></p>
+                                <p class="text-xs text-slate-500 line-clamp-2">Selamat, pendanaan Ekspansi Lahan Tahap 1
+                                    Anda telah terkumpul 100%.</p>
+                            </a>
+                        </div>
+                        <div class="p-3 border-t border-slate-100 text-center"><button
+                                class="text-xs font-bold text-emerald-600 hover:text-emerald-700">Tandai semua
+                                dibaca</button></div>
+                    </div>
+                </div>
+                <div class="w-px h-6 bg-slate-200"></div>
+                <img src="https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=200&q=80"
+                    class="w-9 h-9 rounded-full object-cover border border-slate-200">
+            </div>
+        </header>
+        <main class="flex-1 overflow-y-auto bg-slate-50 p-4 md:p-8">
+            <div class="max-w-5xl mx-auto space-y-6">
+                <!-- AI Card -->
+                <div
+                    class="bg-gradient-to-r from-violet-600 to-indigo-700 rounded-3xl p-8 text-white shadow-lg relative overflow-hidden mb-8">
+                    <div class="absolute right-0 bottom-0 opacity-10"><i data-lucide="sparkles"
+                            class="w-64 h-64 -mb-12 -mr-12"></i></div>
+                    <div class="relative z-10">
+                        <p class="text-violet-200 font-bold text-sm uppercase tracking-wider mb-2">Asisten Cerdas</p>
+                        <h2 class="text-3xl md:text-4xl font-black mb-4">Rekomendasi Harga Otomatis</h2>
+                        <p class="text-indigo-100 max-w-xl mb-6">AI telah menganalisis tren pasar, harga kompetitor di
+                            desa sekitar, dan daya beli konsumen untuk memberikan saran harga ideal bagi produk Anda.
+                        </p>
+                        <button
+                            onclick="window.notif('Proses', 'Mencari insight baru...', 'info'); setTimeout(()=>window.notif('Selesai', 'Harga masih optimal.'),2500)"
+                            class="bg-white text-indigo-700 px-6 py-2.5 rounded-xl font-bold shadow-sm hover:bg-slate-50 transition flex items-center gap-2"><i
+                                data-lucide="refresh-cw" class="w-4 h-4"></i> Analisis Ulang Pasar</button>
+                    </div>
+                </div>
+                <!-- Product Recommendations -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                        <h3 class="font-bold text-slate-900">Saran Pembaruan Harga Hari Ini</h3>
+                    </div>
+                    <div class="divide-y divide-slate-100">
+                        <div class="p-6 flex flex-col md:flex-row items-center gap-6 hover:bg-slate-50 transition">
+                            <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=200&q=80"
+                                class="w-20 h-20 rounded-xl object-cover border border-slate-200 shrink-0">
+                            <div class="flex-1">
+                                <h4 class="font-bold text-slate-900 text-lg">Biji Kopi Robusta Mentah 1Kg</h4>
+                                <div class="flex items-center gap-4 mt-2">
+                                    <div>
+                                        <p class="text-[10px] uppercase font-bold text-slate-400">Harga Anda Saat Ini
+                                        </p>
+                                        <p class="font-bold text-slate-700 line-through">Rp 65.000</p>
+                                    </div>
+                                    <i data-lucide="arrow-right" class="w-5 h-5 text-slate-300"></i>
+                                    <div>
+                                        <p class="text-[10px] uppercase font-bold text-violet-500">Harga Rekomendasi AI
+                                        </p>
+                                        <p class="font-black text-violet-600 text-xl">Rp 72.500</p>
+                                    </div>
+                                </div>
+                                <p
+                                    class="text-xs text-slate-500 mt-2 bg-violet-50 p-2 rounded-lg border border-violet-100">
+                                    <b class="text-violet-700">Insight Pasar:</b> Permintaan robusta di provinsi ini
+                                    naik 18% bulan ini. Banyak kedai kopi baru buka.</p>
+                            </div>
+                            <div class="flex flex-col gap-2 min-w-[140px]">
+                                <button
+                                    onclick="window.notif('Terupdate', 'Katalog diupdate otomatis via API'); this.parentElement.parentElement.remove()"
+                                    class="w-full bg-violet-600 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded-xl shadow-md transition">Terapkan</button>
+                                <button onclick="this.parentElement.parentElement.remove()"
+                                    class="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-2 px-4 rounded-xl border border-slate-200 transition">Abaikan</button>
+                            </div>
+                        </div>
+                        <div class="p-6 flex flex-col md:flex-row items-center gap-6 hover:bg-slate-50 transition">
+                            <img src="https://images.unsplash.com/photo-1620853503254-8c01bc954ff4?w=200&q=80"
+                                class="w-20 h-20 rounded-xl object-cover border border-slate-200 shrink-0">
+                            <div class="flex-1">
+                                <h4 class="font-bold text-slate-900 text-lg">Gula Aren Cair Kemasan 500ml</h4>
+                                <div class="flex items-center gap-4 mt-2">
+                                    <div>
+                                        <p class="text-[10px] uppercase font-bold text-slate-400">Harga Anda Saat Ini
+                                        </p>
+                                        <p class="font-bold text-slate-700">Rp 45.000</p>
+                                    </div>
+                                    <i data-lucide="minus" class="w-5 h-5 text-slate-300"></i>
+                                    <div>
+                                        <p class="text-[10px] uppercase font-bold text-emerald-500">Harga Sudah Ideal
+                                        </p>
+                                        <p class="font-black text-emerald-600 text-xl">Rp 45.000</p>
+                                    </div>
+                                </div>
+                                <p
+                                    class="text-xs text-slate-500 mt-2 bg-emerald-50 p-2 rounded-lg border border-emerald-100">
+                                    <b class="text-emerald-700">Insight Pasar:</b> Harga Anda sangat kompetitif (10%
+                                    lebih murah dari pasar) dan menjamin konversi tinggi.</p>
+                            </div>
+                            <div class="flex flex-col gap-2 min-w-[140px]">
+                                <button
+                                    class="w-full bg-slate-100 text-slate-400 font-bold py-2 px-4 rounded-xl border border-slate-200 cursor-not-allowed"
+                                    disabled>Tidak Ada Aksi</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="js/ai-harga.js"></script>
+    <!-- Global Toast Notif -->
+    <div x-data="{ toasts: [] }"
+        @show-toast.window="let id = Date.now(); toasts.push({id, ...$event.detail}); setTimeout(() => { toasts = toasts.filter(t => t.id !== id) }, 6000)"
+        class="fixed bottom-4 right-4 z-[999] flex flex-col gap-2 pointer-events-none">
+        <template x-for="t in toasts" :key="t.id">
+            <div x-show="true" x-transition.opacity.translate.y.50px
+                class="bg-white border-l-4 shadow-xl rounded-r-2xl p-4 w-72 sm:w-80 flex gap-3 pointer-events-auto transform transition-all hover:bg-slate-50 relative overflow-hidden group"
+                :class="t.type === 'success' ? 'border-emerald-500' : 'border-blue-500'">
+                <div class="flex-1 min-w-0 cursor-pointer" @click="if(t.url) window.location.href=t.url">
+                    <p class="text-sm font-bold text-slate-900 truncate pr-6" x-text="t.title"></p>
+                    <p class="text-xs text-slate-600 line-clamp-2 mt-0.5" x-text="t.text"></p>
+                </div>
+                <button @click="toasts = toasts.filter(x => x.id !== t.id)"
+                    class="text-slate-300 hover:text-rose-500 focus:outline-none transition absolute top-4 right-3 bg-white pl-2">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 6 6 18" />
+                        <path d="m6 6 12 12" />
+                    </svg>
+                </button>
+            </div>
+        </template>
+    </div>
+    <script src="js/global.js"></script>
+</body>

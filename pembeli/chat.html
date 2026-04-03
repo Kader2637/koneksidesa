@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="id" class="bg-slate-50">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Interaktif - E-Commerce</title>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap"
+        rel="stylesheet">
+    <script src="js/tailwind-config.js"></script>
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body class="text-slate-800 font-sans antialiased overflow-y-scroll min-h-screen flex flex-col" x-data="chatApp()"
+    x-init="initApp()">
+
+   <header x-data="{ 
+    mobileSearch: false, 
+    profileOpen: false,
+    isActive(path) { 
+        return window.location.pathname.includes(path);
+    } 
+}" class="bg-white border-b border-slate-200 sticky top-0 z-50">
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-4">
+
+            <div class="flex items-center gap-2 shrink-0">
+                <a href="index.html" class="flex items-center gap-2 cursor-pointer group">
+                    <div
+                        class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-emerald-500 text-white flex items-center justify-center group-hover:bg-emerald-600 transition">
+                        <i data-lucide="shopping-bag" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+                    </div>
+                    <h1 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Koneksi<span
+                            class="text-emerald-500">Desa</span></h1>
+                </a>
+            </div>
+
+            <div class="flex-1 max-w-2xl hidden md:block">
+                <div class="w-full flex">
+                    <input type="text" placeholder="Cari hasil desa..."
+                        class="w-full border-2 border-emerald-500 rounded-l-xl pl-4 pr-4 py-2 text-sm outline-none focus:ring-4 focus:ring-emerald-500/10">
+                    <button class="bg-emerald-500 hover:bg-emerald-600 text-white px-5 rounded-r-xl transition">
+                        <i data-lucide="search" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2 sm:gap-5 shrink-0">
+                <button @click="mobileSearch = !mobileSearch" class="md:hidden p-2 text-slate-500">
+                    <i data-lucide="search" class="w-6 h-6"></i>
+                </button>
+
+                <a href="chat.html" 
+                    :class="isActive('chat.html') ? 'text-emerald-600 bg-emerald-50 rounded-lg' : 'text-slate-500 hover:text-emerald-600'"
+                    class="relative p-2 transition">
+                    <i data-lucide="message-circle" class="w-6 h-6"></i>
+                    <span
+                        class="absolute top-1 right-1 w-4 h-4 bg-rose-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">3</span>
+                </a>
+
+                <a href="keranjang.html"
+                    :class="isActive('keranjang.html') ? 'bg-emerald-200 text-emerald-800' : 'bg-emerald-50 text-emerald-700'"
+                    class="flex items-center gap-2 hover:bg-emerald-100 px-3 sm:px-4 py-2 rounded-xl font-bold text-sm transition">
+                    <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+                    <span class="hidden sm:inline">Rp 45.000</span>
+                </a>
+
+                <div class="flex items-center justify-center cursor-pointer relative"
+                    @click="profileOpen = !profileOpen" @click.away="profileOpen = false">
+                    <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&q=80"
+                        class="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover border-2 border-emerald-100">
+
+                    <div x-show="profileOpen" x-transition x-cloak
+                        class="absolute top-full right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-200 py-2 z-50">
+                        <a href="profile.html"
+                            class="px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 flex items-center gap-2">
+                            <i data-lucide="user" class="w-4 h-4"></i> Profil Saya
+                        </a>
+                        <hr class="my-1 border-slate-100">
+                        <a href="../index.html"
+                            class="px-4 py-2 text-sm text-rose-600 hover:bg-rose-50 font-bold flex items-center gap-2">
+                            <i data-lucide="log-out" class="w-4 h-4"></i> Keluar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div x-show="mobileSearch" x-transition x-cloak class="md:hidden px-4 pb-4">
+            <div class="flex">
+                <input type="text" placeholder="Cari di KoneksiDesa..."
+                    class="w-full border-2 border-emerald-500 rounded-l-lg px-4 py-2 text-sm outline-none">
+                <button class="bg-emerald-500 text-white px-4 rounded-r-lg">
+                    <i data-lucide="search" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-white border-t border-slate-50 overflow-x-auto hide-scrollbar">
+            <div class="flex gap-6 sm:gap-8 py-3 text-xs sm:text-sm whitespace-nowrap">
+
+                <a href="index.html"
+                    :class="isActive('index.html') ? 'text-emerald-600 font-bold border-b-2 border-emerald-600' : 'text-slate-500 font-medium hover:text-emerald-600'"
+                    class="transition-colors py-1">
+                    Beranda
+                </a>
+
+                <a href="rekomendasi.html"
+                    :class="isActive('rekomendasi.html') ? 'text-emerald-600 font-bold border-b-2 border-emerald-600' : 'text-slate-500 font-medium hover:text-emerald-600'"
+                    class="py-1 flex items-center gap-1">
+                    <i data-lucide="sparkles" class="w-3 h-3 sm:w-4 sm:h-4 text-amber-500"></i> AI Rekomendasi
+                </a>
+
+                <a href="peta.html"
+                    :class="isActive('peta.html') ? 'text-emerald-600 font-bold border-b-2 border-emerald-600' : 'text-slate-500 font-medium hover:text-emerald-600'"
+                    class="py-1">Peta UMKM</a>
+
+                <a href="lacak.html"
+                    :class="isActive('lacak.html') ? 'text-emerald-600 font-bold border-b-2 border-emerald-600' : 'text-slate-500 font-medium hover:text-emerald-600'"
+                    class="py-1">Lacak Logistik</a>
+
+                <a href="ulasan.html"
+                    :class="isActive('ulasan.html') ? 'text-emerald-600 font-bold border-b-2 border-emerald-600' : 'text-slate-500 font-medium hover:text-emerald-600'"
+                    class="py-1">Ulasan</a>
+            </div>
+        </div>
+    </header>
+
+    <main
+        class="flex-1 flex flex-col md:flex-row py-4 md:py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full gap-6 group-main"
+        x-cloak>
+
+        <div class="w-full md:w-1/3 bg-white border border-slate-200 rounded-3xl h-[80vh] md:h-[650px] shadow-sm overflow-hidden"
+            :class="activeChat ? 'hidden md:flex flex-col' : 'flex flex-col'">
+
+            <div class="p-4 md:p-5 border-b border-slate-100 shrink-0">
+                <h2 class="text-xl font-bold text-slate-800 mb-4">Pesan Masuk</h2>
+                <div class="relative">
+                    <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3 text-slate-400"></i>
+                    <input type="text" placeholder="Cari UMKM..."
+                        class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition">
+                </div>
+            </div>
+
+            <div class="flex-1 overflow-y-auto">
+                <template x-for="chat in chatList" :key="chat.id">
+                    <div @click="activeChat = chat"
+                        class="p-4 border-b border-slate-50 hover:bg-slate-50 cursor-pointer transition flex gap-3 relative"
+                        :class="activeChat && activeChat.id === chat.id ? 'bg-emerald-50/50' : ''">
+                        <div class="relative shrink-0">
+                            <img :src="chat.avatar" class="w-12 h-12 rounded-full object-cover border border-slate-200">
+                            <span x-show="chat.online"
+                                class="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full"></span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex justify-between items-center mb-1">
+                                <h3 class="font-bold text-sm text-slate-900 truncate" x-text="chat.name"></h3>
+                                <span class="text-[10px] text-slate-400 shrink-0" x-text="chat.time"></span>
+                            </div>
+                            <p class="text-xs text-slate-500 truncate"
+                                :class="chat.unread > 0 ? 'font-bold text-slate-800' : ''" x-text="chat.lastMsg"></p>
+                        </div>
+                        <div x-show="chat.unread > 0"
+                            class="absolute right-4 top-10 bg-rose-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center"
+                            x-text="chat.unread"></div>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <div class="flex-1 bg-white border border-slate-200 rounded-3xl h-[80vh] md:h-[650px] shadow-sm overflow-hidden relative"
+            :class="activeChat ? 'flex flex-col' : 'hidden md:flex flex-col'">
+
+            <div x-show="!activeChat" class="hidden md:flex flex-col items-center justify-center h-full text-slate-400">
+                <div
+                    class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mb-4 border border-slate-100">
+                    <i data-lucide="message-square-dashed" class="w-12 h-12 text-slate-300"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-700 mb-1">Pilih Pesan</h3>
+                <p class="text-sm">Pilih obrolan dari daftar di sebelah kiri untuk mulai membaca.</p>
+            </div>
+
+            <template x-if="activeChat">
+                <div class="flex flex-col h-full w-full">
+
+                    <div
+                        class="h-16 border-b border-slate-200 flex items-center justify-between px-4 md:px-6 bg-white shrink-0">
+                        <div class="flex items-center gap-2 md:gap-3">
+                            <button @click="activeChat = null"
+                                class="md:hidden p-2 -ml-2 mr-1 text-slate-500 hover:text-emerald-600 hover:bg-slate-100 rounded-xl transition flex items-center justify-center">
+                                <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                            </button>
+
+                            <img :src="activeChat.avatar"
+                                class="w-9 h-9 md:w-10 md:h-10 rounded-full object-cover border border-slate-200">
+                            <div>
+                                <h2 class="font-bold text-slate-800 text-sm md:text-base" x-text="activeChat.name"></h2>
+                                <p class="text-[10px] md:text-xs text-emerald-600 flex items-center gap-1">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Membalas dalam 5 menit
+                                </p>
+                            </div>
+                        </div>
+                        <button class="text-slate-400 hover:text-emerald-600 transition"><i data-lucide="more-vertical"
+                                class="w-5 h-5"></i></button>
+                    </div>
+
+                    <div
+                        class="bg-slate-50 p-2 md:p-3 mx-4 md:mx-6 mt-4 rounded-xl border border-slate-200 flex gap-3 items-center shrink-0">
+                        <img src="https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=100&q=80"
+                            class="w-10 h-10 md:w-12 md:h-12 rounded-lg object-cover">
+                        <div class="flex-1 min-w-0">
+                            <h4 class="text-xs md:text-sm font-bold text-slate-800 truncate">Kopi Bubuk Asli Desa
+                                (Robusta)</h4>
+                            <p class="text-[10px] md:text-xs text-emerald-600 font-semibold">Rp 35.000 / 250gr</p>
+                        </div>
+                        <button
+                            class="text-xs bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1.5 md:px-4 md:py-2 rounded-lg font-bold transition shrink-0">Beli</button>
+                    </div>
+
+                    <div class="flex-1 overflow-y-auto p-4 md:p-6 space-y-4" id="chat-container">
+                        <template x-for="msg in messages" :key="msg.id">
+                            <div class="flex w-full" :class="msg.sender === 'me' ? 'justify-end' : 'justify-start'">
+                                <div class="max-w-[85%] md:max-w-[65%]">
+                                    <div class="p-3 md:p-3.5 rounded-2xl text-[13px] md:text-sm shadow-sm"
+                                        :class="msg.sender === 'me' ? 'bg-emerald-500 text-white rounded-tr-sm' : 'bg-slate-100 text-slate-800 rounded-tl-sm'">
+                                        <p x-text="msg.text" class="leading-relaxed break-words"></p>
+                                    </div>
+                                    <p class="text-[10px] text-slate-400 mt-1"
+                                        :class="msg.sender === 'me' ? 'text-right' : 'text-left'" x-text="msg.time"></p>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+
+                    <div class="p-3 md:p-4 bg-white border-t border-slate-200 shrink-0">
+                        <form @submit.prevent="sendMessage"
+                            class="flex gap-2 items-center bg-slate-50 border border-slate-200 rounded-full px-1.5 py-1.5 focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20 transition">
+                            <button type="button"
+                                class="p-2 text-slate-400 hover:text-emerald-500 transition rounded-full hover:bg-slate-200 shrink-0">
+                                <i data-lucide="image" class="w-4 h-4 md:w-5 md:h-5"></i>
+                            </button>
+                            <input type="text" x-model="newMessage" placeholder="Ketik pesan..."
+                                class="flex-1 bg-transparent text-sm outline-none px-1 md:px-2 text-slate-700 w-full">
+                            <button type="submit"
+                                class="w-8 h-8 md:w-10 md:h-10 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full flex items-center justify-center transition disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+                                :disabled="newMessage.trim() === ''">
+                                <i data-lucide="send" class="w-3 h-3 md:w-4 md:h-4 ml-0.5 md:ml-1"></i>
+                            </button>
+                        </form>
+                    </div>
+
+                </div>
+            </template>
+        </div>
+    </main>
+
+    <footer class="bg-slate-900 border-t border-slate-800 pt-16 pb-8 mt-12 text-slate-400">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
+
+                <div class="space-y-5">
+                    <a href="index.html" class="flex items-center gap-2 group cursor-pointer w-max">
+                        <div
+                            class="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center group-hover:bg-emerald-600 transition shadow-lg shadow-emerald-500/20">
+                            <i data-lucide="shopping-bag" class="w-5 h-5"></i>
+                        </div>
+                        <h1 class="text-2xl font-heading font-black text-white tracking-tight">Koneksi<span
+                                class="text-emerald-500">Desa</span></h1>
+                    </a>
+                    <p class="text-sm text-slate-500 leading-relaxed pr-4">
+                        Memberdayakan ekonomi desa melalui teknologi. Platform e-commerce yang menghubungkan langsung
+                        petani dan perajin UMKM ke tangan Anda.
+                    </p>
+                    <div class="flex items-center gap-3 pt-2">
+                        <a href="#"
+                            class="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 hover:bg-emerald-500 hover:border-emerald-500 hover:text-white flex items-center justify-center transition-all duration-300"
+                            title="Instagram"><i data-lucide="instagram" class="w-4 h-4"></i></a>
+                        <a href="#"
+                            class="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 hover:bg-emerald-500 hover:border-emerald-500 hover:text-white flex items-center justify-center transition-all duration-300"
+                            title="Facebook"><i data-lucide="facebook" class="w-4 h-4"></i></a>
+                        <a href="#"
+                            class="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 hover:bg-emerald-500 hover:border-emerald-500 hover:text-white flex items-center justify-center transition-all duration-300"
+                            title="YouTube"><i data-lucide="youtube" class="w-4 h-4"></i></a>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-white font-bold mb-5 uppercase text-sm tracking-wider">Eksplorasi</h3>
+                    <ul class="space-y-3 text-sm">
+                        <li><a href="index.html"
+                                class="hover:text-emerald-400 hover:translate-x-1 inline-block transition-all">Beranda
+                                Marketplace</a></li>
+                        <li><a href="peta.html"
+                                class="hover:text-emerald-400 hover:translate-x-1 inline-block transition-all">Peta UMKM
+                                COD</a></li>
+                        <li><a href="rekomendasi.html"
+                                class="hover:text-emerald-400 hover:translate-x-1 inline-block transition-all">AI
+                                Rekomendasi Fitur</a></li>
+                        <li><a href="lacak.html"
+                                class="hover:text-emerald-400 hover:translate-x-1 inline-block transition-all">Lacak
+                                Pesanan (Logistik)</a></li>
+                        <li><a href="ulasan.html"
+                                class="text-emerald-500 font-medium inline-block transition-all">Rating & Ulasan</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-white font-bold mb-5 uppercase text-sm tracking-wider">Bantuan Layanan</h3>
+                    <ul class="space-y-3 text-sm">
+                        <li><a href="#"
+                                class="hover:text-emerald-400 hover:translate-x-1 inline-block transition-all">Pusat
+                                Bantuan (FAQ)</a></li>
+                        <li><a href="#"
+                                class="hover:text-emerald-400 hover:translate-x-1 inline-block transition-all">Cara
+                                Menjadi Mitra UMKM</a></li>
+                        <li><a href="#"
+                                class="hover:text-emerald-400 hover:translate-x-1 inline-block transition-all">Syarat &
+                                Ketentuan</a></li>
+                        <li><a href="#"
+                                class="hover:text-emerald-400 hover:translate-x-1 inline-block transition-all">Kebijakan
+                                Privasi</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-white font-bold mb-5 uppercase text-sm tracking-wider">Hubungi Kami</h3>
+                    <ul class="space-y-4 text-sm mb-6 text-slate-400">
+                        <li class="flex items-start gap-3">
+                            <i data-lucide="map-pin" class="w-5 h-5 mt-0.5 shrink-0 text-emerald-500"></i>
+                            <span class="leading-relaxed">Jl. Raya Tlogomas No. 246, Kec. Lowokwaru, Kota Malang, Jawa
+                                Timur 65144</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i data-lucide="phone" class="w-4 h-4 shrink-0 text-emerald-500"></i>
+                            <span>(0341) 123-4567</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i data-lucide="mail" class="w-4 h-4 shrink-0 text-emerald-500"></i>
+                            <a href="mailto:halo@koneksidesa.com"
+                                class="hover:text-emerald-400 transition-colors">halo@koneksidesa.com</a>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <div class="border-t border-slate-800 pt-8 flex flex-col md:flex-row items-center justify-between gap-6">
+                <p class="text-sm text-slate-500 text-center md:text-left">
+                    Dibangun dengan <i data-lucide="heart"
+                        class="w-4 h-4 inline-block text-rose-500 fill-rose-500 animate-pulse mx-0.5 -translate-y-0.5"></i>
+                    oleh <span
+                        class="text-slate-300 font-bold hover:text-emerald-400 transition-colors cursor-pointer">KoneksiDesa</span>
+                    © 2026. Hak Cipta Dilindungi.
+                </p>
+
+                <div class="flex items-center gap-3">
+                    <span class="text-xs font-bold text-slate-600 mr-2">Dukungan Pembayaran:</span>
+                    <div
+                        class="px-3 py-1.5 bg-slate-800 rounded-lg text-xs font-black text-slate-300 border border-slate-700 cursor-default hover:border-emerald-500 transition-colors">
+                        QRIS</div>
+                    <div
+                        class="px-3 py-1.5 bg-slate-800 rounded-lg text-xs font-black text-slate-300 border border-slate-700 cursor-default hover:border-emerald-500 transition-colors">
+                        COD</div>
+                    <div
+                        class="px-3 py-1.5 bg-slate-800 rounded-lg text-xs font-black text-slate-300 border border-slate-700 cursor-default hover:border-emerald-500 transition-colors">
+                        BANK</div>
+                </div>
+            </div>
+
+        </div>
+    </footer>
+
+    <div x-data="{ toasts: [] }"
+        @show-toast.window="let id = Date.now(); toasts.push({id, ...$event.detail}); setTimeout(() => { toasts = toasts.filter(t => t.id !== id) }, 6000)"
+        class="fixed bottom-4 right-4 z-[999] flex flex-col gap-2 pointer-events-none">
+        <template x-for="t in toasts" :key="t.id">
+            <div x-show="true" x-transition.opacity.translate.y.50px
+                class="bg-white border-l-4 shadow-xl rounded-r-2xl p-4 w-72 sm:w-80 flex gap-3 pointer-events-auto transform transition-all hover:bg-slate-50 relative overflow-hidden group"
+                :class="t.type === 'error' ? 'border-rose-500' : 'border-emerald-500'">
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-bold text-slate-900 truncate pr-6" x-text="t.title"></p>
+                    <p class="text-xs text-slate-600 line-clamp-2 mt-0.5" x-text="t.text"></p>
+                </div>
+                <button @click="toasts = toasts.filter(x => x.id !== t.id)"
+                    class="text-slate-300 hover:text-rose-500 focus:outline-none transition absolute top-4 right-3 bg-white pl-2">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 6 6 18" />
+                        <path d="m6 6 12 12" />
+                    </svg>
+                </button>
+            </div>
+        </template>
+    </div>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('chatApp', () => ({
+                profileOpen: false,
+                newMessage: '',
+                chatList: [
+                    { id: 1, name: 'Kopi Nusantara Pak Joko', avatar: 'https://ui-avatars.com/api/?name=Kopi+Nusantara&background=0f172a&color=fff', lastMsg: 'Baik mas, ditunggu orderannya ya.', time: '10:45', unread: 0, online: true },
+                    { id: 2, name: 'Sayur Organik Bu Siti', avatar: 'https://ui-avatars.com/api/?name=Sayur+Organik&background=eab308&color=fff', lastMsg: 'Tomat hari ini habis, besok panen lagi.', time: 'Kemarin', unread: 2, online: false },
+                    { id: 3, name: 'Kerajinan Bambu Lestari', avatar: 'https://ui-avatars.com/api/?name=Bambu+Lestari&background=3b82f6&color=fff', lastMsg: 'Bisa custom ukuran kok, Kak.', time: 'Senin', unread: 0, online: true }
+                ],
+                activeChat: null,
+                messages: [
+                    { id: 1, sender: 'me', text: 'Halo Pak Joko, Kopi Robustanya ready yang kemasan 250gr?', time: '10:30' },
+                    { id: 2, sender: 'them', text: 'Halo mas, ready banyak. Baru selesai disangrai kemarin sore.', time: '10:32' },
+                    { id: 3, sender: 'me', text: 'Wah mantap. Kalau kirim ke kota pakai ekspedisi lokal aman bungkusnya?', time: '10:35' },
+                    { id: 4, sender: 'them', text: 'Aman mas, kita pakai bubble wrap tebal dan kardus. Baik mas, ditunggu orderannya ya.', time: '10:45' },
+                ],
+                initApp() {
+                    this.activeChat = this.chatList[0];
+                    setTimeout(() => { lucide.createIcons(); }, 100);
+                },
+                sendMessage() {
+                    if (this.newMessage.trim() === '') return;
+
+                    // Push pesan dari pembeli
+                    this.messages.push({
+                        id: Date.now(),
+                        sender: 'me',
+                        text: this.newMessage,
+                        time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+                    });
+
+                    // Update preview pesan di menu samping
+                    this.activeChat.lastMsg = this.newMessage;
+                    this.activeChat.time = 'Baru saja';
+                    this.newMessage = '';
+
+                    // Auto-scroll kebawah setiap kali chat terkirim
+                    setTimeout(() => {
+                        const container = document.getElementById('chat-container');
+                        if (container) container.scrollTop = container.scrollHeight;
+                        lucide.createIcons();
+                    }, 50);
+                }
+            }))
+        });
+    </script>
+
+    <script src="js/global.js"></script>
+    <script src="js/chat-app.js"></script>
+</body>
+
+</html>

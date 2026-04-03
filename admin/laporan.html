@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="id" class="bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tiket Bantuan - Fasilitator Pusat</title>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <script src="js/tailwind-config.js"></script>
+    <style> [x-cloak] { display: none !important; } ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; } </style>
+</head>
+<body class="text-slate-800 font-sans antialiased overflow-hidden h-screen flex" x-data="laporApp()" x-init="initApp()">
+
+    <div class="fixed inset-0 bg-slate-900/50 z-40 lg:hidden" x-show="sidebarOpen" x-transition.opacity @click="sidebarOpen = false" x-cloak></div>
+    
+    <aside class="fixed lg:static inset-y-0 left-0 z-50 w-72 bg-[#0f172a] text-slate-400 flex flex-col transition-transform duration-300 shadow-2xl lg:shadow-none border-r border-slate-800" :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'">
+        <div class="h-16 flex items-center px-6 bg-[#0b1120] border-b border-slate-800 font-heading font-bold text-xl text-white tracking-tight">Koneksi<span class="text-blue-500">Desa</span> <span class="ml-2 text-[10px] bg-blue-900/50 text-blue-400 px-2 rounded uppercase tracking-widest font-sans border border-blue-800">Admin</span></div>
+        
+        <div class="flex-1 overflow-y-auto py-6 px-4 space-y-1">
+            <p class="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2 mt-2">Sistem Pusat</p>
+            <a href="index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition hover:bg-slate-800 hover:text-slate-200 font-medium"><i data-lucide="layout-dashboard" class="w-5 h-5"></i> Dashboard Statistik</a>
+            <a href="peta.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition hover:bg-slate-800 hover:text-slate-200 font-medium"><i data-lucide="map" class="w-5 h-5"></i> Pengaturan Peta</a>
+            
+            <p class="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2 mt-6">Moderasi & Valuasi</p>
+            <a href="verifikasi.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition hover:bg-slate-800 hover:text-slate-200 font-medium"><i data-lucide="user-check" class="w-5 h-5"></i> Panel Verifikasi Akun</a>
+            <a href="pengguna.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition hover:bg-slate-800 hover:text-slate-200 font-medium"><i data-lucide="users" class="w-5 h-5"></i> Manajemen Pengguna</a>
+            <a href="moderasi.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition hover:bg-slate-800 hover:text-slate-200 font-medium"><i data-lucide="shield-alert" class="w-5 h-5"></i> Moderasi Produk</a>
+            
+            <p class="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2 mt-6">Keuangan & Cs</p>
+            <a href="pantau-dana.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition hover:bg-slate-800 hover:text-slate-200 font-medium"><i data-lucide="line-chart" class="w-5 h-5"></i> Pantauan Pendanaan</a>
+            <a href="laba.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition hover:bg-slate-800 hover:text-slate-200 font-medium"><i data-lucide="wallet" class="w-5 h-5"></i> Laporan Keuangan</a>
+            <a href="laporan.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition bg-blue-600 shadow-md shadow-blue-500/20 text-white font-bold border border-blue-500"><i data-lucide="ticket" class="w-5 h-5"></i> Pusat Keluhan (Tiket)</a>
+        </div>
+
+        <div class="p-4 border-t border-slate-800">
+            <a href="../index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-rose-500/10 text-rose-500 font-bold transition w-full"><i data-lucide="log-out" class="w-5 h-5"></i> Keluar Sistem</a>
+        </div>
+    </aside>
+
+    <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+        <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 z-10 shrink-0 shadow-sm relative">
+            <div class="absolute inset-0 bg-blue-500 h-1"></div>
+            <div class="flex items-center gap-4">
+                <button @click="sidebarOpen = true" class="lg:hidden text-slate-500 hover:text-blue-600"><i data-lucide="menu" class="w-5 h-5"></i></button>
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center"><i data-lucide="shield-check" class="w-4 h-4"></i></div>
+                    <h1 class="text-xl font-heading font-bold text-slate-900 hidden sm:block">Panel Pengelola Data</h1>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <button onclick="window.notif('Server Siaga', 'Pusat sistem desa online.')" class="p-2 text-slate-400 hover:text-blue-600 transition"><i data-lucide="bell" class="w-5 h-5"></i></button>
+                <div class="w-px h-6 bg-slate-200"></div>
+                <div class="flex items-center gap-2 cursor-pointer hover:bg-slate-50 p-1 pr-3 rounded-full border border-transparent hover:border-slate-200 transition">
+                    <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&q=80" class="w-8 h-8 rounded-full object-cover">
+                    <span class="text-sm font-bold text-slate-700 hidden sm:block w-32 truncate">Sudarman (Fasilitator)</span>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-1 overflow-y-auto bg-[#f8fafc] p-4 md:p-8">
+            <div class="max-w-7xl mx-auto space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-2xl border border-rose-200 shadow-sm relative overflow-hidden">
+                        <div class="w-1.5 h-full bg-rose-500 absolute left-0 top-0"></div>
+                        <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1 pl-2">Tiket Mendesak (Urgent)</p>
+                        <h3 class="text-3xl font-black text-rose-600 pl-2">3</h3>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
+                        <div class="w-1.5 h-full bg-amber-400 absolute left-0 top-0"></div>
+                        <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1 pl-2">Menunggu Balasan (Terbuka)</p>
+                        <h3 class="text-3xl font-black text-slate-900 pl-2">12</h3>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
+                        <div class="w-1.5 h-full bg-emerald-500 absolute left-0 top-0"></div>
+                        <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1 pl-2">Tiket Selesai (Bulan Ini)</p>
+                        <h3 class="text-3xl font-black text-slate-900 pl-2">84</h3>
+                    </div>
+                </div>
+
+                <!-- Tickets List -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mt-6 flex flex-col md:flex-row h-[600px]">
+                    <!-- Sidebar Tiket -->
+                    <div class="w-full md:w-1/3 border-r border-slate-200 flex flex-col bg-slate-50">
+                        <div class="p-4 border-b border-slate-200 bg-white">
+                            <input type="text" placeholder="Cari ID tiket atau pelapor..." class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-500">
+                        </div>
+                        <div class="flex-1 overflow-y-auto divide-y divide-slate-100">
+                            <!-- Ticket Item -->
+                            <div class="p-4 bg-white/50 border-l-2 border-rose-500 hover:bg-white cursor-pointer transition">
+                                <div class="flex justify-between items-start mb-1">
+                                    <span class="text-xs font-bold text-slate-900">#TK-9021</span>
+                                    <span class="text-[10px] bg-rose-100 text-rose-700 px-1.5 rounded font-bold">Urgent</span>
+                                </div>
+                                <p class="text-sm font-bold text-slate-800 line-clamp-1 mb-1">Gagal Penarikan Saldo Modal</p>
+                                <p class="text-xs text-slate-500 mb-2">Koperasi Tani Rejo (UMKM)</p>
+                                <p class="text-[10px] text-slate-400">14:30 WIB</p>
+                            </div>
+                            <div class="p-4 bg-slate-50 hover:bg-white cursor-pointer transition">
+                                <div class="flex justify-between items-start mb-1">
+                                    <span class="text-xs font-bold text-slate-900">#TK-9018</span>
+                                    <span class="text-[10px] bg-amber-100 text-amber-700 px-1.5 rounded font-bold">Open</span>
+                                </div>
+                                <p class="text-sm font-bold text-slate-800 line-clamp-1 mb-1">Email Notifikasi Tidak Masuk</p>
+                                <p class="text-xs text-slate-500 mb-2">Hadi Prabowo (Investor)</p>
+                                <p class="text-[10px] text-slate-400">Kemarin, 09:12</p>
+                            </div>
+                            <div class="p-4 bg-slate-50 hover:bg-white cursor-pointer transition">
+                                <div class="flex justify-between items-start mb-1">
+                                    <span class="text-xs font-bold text-slate-400">#TK-8001</span>
+                                    <span class="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 rounded font-bold">Solved</span>
+                                </div>
+                                <p class="text-sm font-medium text-slate-500 line-clamp-1 mb-1">Ubah Nama Profil Kios</p>
+                                <p class="text-xs text-slate-400 mb-2">Siti Kue Kering</p>
+                                <p class="text-[10px] text-slate-400">2 hari lalu</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Room Interaksi -->
+                    <div class="w-full md:w-2/3 flex flex-col bg-white">
+                        <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-white shadow-sm z-10">
+                            <div>
+                                <h2 class="font-black text-lg text-slate-900">Gagal Penarikan Saldo Modal</h2>
+                                <p class="text-xs text-slate-500 mt-1">#TK-9021 • Koperasi Tani Rejo (UMKM) • <span class="text-rose-600 font-bold">Urgent</span></p>
+                            </div>
+                            <button onclick="window.notif('Tiket Ditutup', 'Keluhan #TK-9021 telah ditandai selesai.', 'success')" class="text-emerald-600 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded text-xs font-bold border border-emerald-200 transition">Tandai Selesai</button>
+                        </div>
+                        <div class="flex-1 overflow-y-auto p-5 space-y-6 bg-slate-50/50">
+                            <!-- User Message -->
+                            <div class="flex gap-4">
+                                <div class="w-8 h-8 rounded-full bg-slate-200 shrink-0"></div>
+                                <div class="flex-1 bg-white p-4 rounded-2xl rounded-tl-sm border border-slate-200 shadow-sm relative">
+                                    <p class="text-xs font-bold text-slate-400 mb-2">Koperasi Tani Rejo <span class="font-normal">• 14:30 WIB</span></p>
+                                    <p class="text-sm text-slate-700 leading-relaxed">Halo Min, dana cair dari bursa modal sebesar Rp 150 Juta belum masuk ke rekening BNI kami. Status di Dasbor UMKM tertulis 'Escrow Tersalurkan Selesai', tapi sudah 2 jam saldo rekening kami belum bertambah. Tolong dibantu cek.</p>
+                                </div>
+                            </div>
+                            <!-- System/Admin Reply -->
+                            <div class="flex gap-4 flex-row-reverse">
+                                <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0"><i data-lucide="shield" class="w-4 h-4"></i></div>
+                                <div class="flex-1 bg-blue-600 p-4 rounded-2xl rounded-tr-sm shadow-sm relative text-white">
+                                    <p class="text-xs font-bold text-blue-200 mb-2">Anda (Fasilitator) <span class="font-normal text-blue-300">• 14:45 WIB</span></p>
+                                    <p class="text-sm leading-relaxed">Baik Bapak/Ibu, kami telah melakukan pengecekan ke *Payment Gateway*. Saat ini sedang ada *delay* kliring antarbangsa dari bank pengirim. Dana diperkirakan akan mendarat maksimal pukul 17:00 WIB sore ini. Mohon ditunggu ya.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Reply Box -->
+                        <div class="p-4 border-t border-slate-200 bg-white">
+                            <textarea placeholder="Tulis balasan untuk pelapor..." class="w-full border border-slate-200 rounded-xl p-3 outline-none focus:border-blue-500 text-sm h-20 resize-none"></textarea>
+                            <div class="flex justify-between items-center mt-3">
+                                <button class="text-slate-400 hover:text-slate-600"><i data-lucide="paperclip" class="w-5 h-5"></i></button>
+                                <button onclick="window.notif('Pesan Terkirim', 'Balasan tiket berhasil dikirim ke pelapor')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg text-sm shadow-sm transition">Kirim Balasan</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/global.js"></script>
+    <script src="js/laporan-app.js"></script>
+
+    <!-- Global Toast Notif -->
+    <div x-data="{ toasts: [] }" @show-toast.window="let id = Date.now(); toasts.push({id, ...$event.detail}); setTimeout(() => { toasts = toasts.filter(t => t.id !== id) }, 6000)" class="fixed bottom-4 right-4 z-[999] flex flex-col gap-2 pointer-events-none">
+        <template x-for="t in toasts" :key="t.id">
+            <div x-show="true" x-transition.opacity.translate.y.50px class="bg-white border-l-4 shadow-xl rounded-r-2xl p-4 w-72 sm:w-80 flex gap-3 pointer-events-auto transform transition-all hover:bg-slate-50 relative overflow-hidden group" :class="t.type === 'error' ? 'border-rose-500' : 'border-blue-500'">
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-bold text-slate-900 truncate pr-6" x-text="t.title"></p>
+                    <p class="text-xs text-slate-600 line-clamp-2 mt-0.5" x-text="t.text"></p>
+                </div>
+                <button @click="toasts = toasts.filter(x => x.id !== t.id)" class="text-slate-300 hover:text-rose-500 focus:outline-none transition absolute top-4 right-3 bg-white pl-2">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </button>
+            </div>
+        </template>
+    </div>
+
+</body>
+</html>
