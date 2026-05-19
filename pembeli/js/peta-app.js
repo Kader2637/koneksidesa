@@ -1,1 +1,0 @@
-function petaApp() { return { profileOpen: false, initApp() { setTimeout(() => { if(window.lucide) lucide.createIcons(); }, 100); } } }
