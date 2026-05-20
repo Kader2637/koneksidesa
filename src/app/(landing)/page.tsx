@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Tractor, Trees, Store, Users, ArrowRight, ArrowUpRight, 
@@ -31,6 +32,40 @@ interface InvestCampaign {
   color: string;
   badgeColor: string;
 }
+
+const TypewriterText = ({ text, delay = 0 }: { text: string, delay?: number }) => {
+  const [displayedText, setDisplayedText] = useState("");
+  
+  useEffect(() => {
+    let timeout: NodeJS.Timeout;
+    
+    timeout = setTimeout(() => {
+      let i = 0;
+      setDisplayedText("");
+      const intervalId = setInterval(() => {
+        setDisplayedText(text.slice(0, i + 1));
+        i++;
+        if (i >= text.length) {
+          clearInterval(intervalId);
+        }
+      }, 70);
+      return () => clearInterval(intervalId);
+    }, delay);
+
+    return () => clearTimeout(timeout);
+  }, [text, delay]);
+
+  return (
+    <span className="relative">
+      {displayedText}
+      <motion.span 
+        animate={{ opacity: [1, 0, 1] }}
+        transition={{ repeat: Infinity, duration: 0.8, ease: "linear" }}
+        className="absolute -right-3 top-[10%] h-[80%] w-[4px] sm:w-[6px] bg-emerald-500 rounded-full"
+      />
+    </span>
+  );
+};
 
 export default function Home() {
   const [selectedCat, setSelectedCat] = useState("Semua");
@@ -231,7 +266,7 @@ export default function Home() {
       <main className="flex-1 w-full pt-[73px]">
         
         {/* 2. HERO SECTION WITH DEEP GLASSMORPHISM & ANIMATED GRADIENT */}
-        <section className="relative pt-28 pb-40 md:pt-36 md:pb-48 overflow-hidden bg-slate-50 dark:bg-zinc-950 border-b border-slate-200/60 dark:border-zinc-900">
+        <section className="relative min-h-screen flex items-center pt-24 pb-12 overflow-hidden bg-slate-50 dark:bg-zinc-950 border-b border-slate-200/60 dark:border-zinc-900">
           {/* Glowing animated ambient circles */}
           <div className="absolute top-1/4 left-1/3 w-[600px] h-[600px] bg-gradient-to-tr from-emerald-500/10 via-teal-500/5 to-transparent rounded-full blur-3xl pointer-events-none animate-pulse" style={{ animationDuration: "10s" }} />
           <div className="absolute bottom-10 right-1/4 w-[500px] h-[500px] bg-gradient-to-br from-blue-500/10 via-indigo-500/5 to-transparent rounded-full blur-3xl pointer-events-none animate-pulse" style={{ animationDuration: "14s" }} />
@@ -263,12 +298,11 @@ export default function Home() {
                 initial={{ opacity: 0, y: 25 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.1 }}
-                className="text-5xl md:text-7xl font-heading font-black text-slate-900 dark:text-white tracking-tight leading-[1.05]"
+                className="text-4xl md:text-5xl lg:text-6xl font-heading font-extrabold text-slate-900 dark:text-white tracking-tight leading-[1.1]"
               >
                 Desa Mandiri.<br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-blue-600 dark:from-emerald-400 dark:to-blue-400 relative">
-                  Ekonomi Berputar.
-                  <span className="absolute -bottom-2 left-0 w-1/3 h-1.5 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full" />
+                <span className="text-emerald-600 dark:text-emerald-400 relative inline-block pr-4">
+                  <TypewriterText text="Ekonomi Berputar." delay={600} />
                 </span>
               </motion.h1>
 
@@ -306,83 +340,102 @@ export default function Home() {
               </motion.div>
             </div>
 
-            {/* Right side floating widgets column */}
-            <div className="lg:col-span-5 relative w-full h-[360px] md:h-[400px] flex items-center justify-center">
+            {/* Right side Ultra-Modern Floating Stack */}
+            <div className="lg:col-span-5 relative z-10 w-full mt-12 lg:mt-0 h-[450px] lg:h-[550px] flex items-center justify-center">
               
-              {/* Dynamic live transactions alert tag */}
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={currentTxIndex}
-                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.9, y: -20 }}
-                  transition={{ duration: 0.5 }}
-                  className="absolute z-20 top-4 left-6 bg-white/70 dark:bg-zinc-900/70 backdrop-blur-xl border border-slate-200/60 dark:border-zinc-800/80 p-5 rounded-[2rem] shadow-xl w-72"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center">
-                      <ArrowRightLeft className="w-4.5 h-4.5 animate-pulse" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest">Live Transaksi</p>
-                      <h4 className="font-extrabold text-xs text-slate-900 dark:text-white truncate">{activeTx.name}</h4>
-                      <p className="text-[10px] text-slate-500 dark:text-zinc-400 font-semibold">{activeTx.action}</p>
-                    </div>
-                  </div>
-                  <div className="flex justify-between items-center mt-3 pt-3 border-t border-slate-200/50 dark:border-zinc-800 text-[10px] font-bold">
-                    <span className="text-emerald-600 dark:text-emerald-400">{activeTx.value}</span>
-                    <span className="text-slate-400 dark:text-zinc-500 font-mono">{activeTx.location}</span>
-                  </div>
-                </motion.div>
-              </AnimatePresence>
+              {/* Massive background glow */}
+              <div className="absolute inset-0 bg-emerald-500/20 blur-[100px] rounded-full pointer-events-none" />
 
-              {/* Mini Interactive AI Score pulse box */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="absolute z-20 bottom-8 right-6 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border border-slate-200/60 dark:border-zinc-800/80 p-6 rounded-[2.5rem] shadow-xl w-64 text-center"
+              {/* Main Image Base */}
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9, rotate: -2 }}
+                animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                transition={{ duration: 0.8, type: "spring", bounce: 0.4 }}
+                whileHover={{ scale: 1.02, rotate: 1 }}
+                className="w-full max-w-[280px] sm:max-w-sm lg:max-w-md h-[380px] lg:h-[450px] rounded-[3rem] overflow-hidden shadow-[0_0_50px_-12px_rgba(16,185,129,0.3)] relative z-10 cursor-pointer border border-white/20 dark:border-white/10"
               >
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <Sparkles className="w-4.5 h-4.5 text-amber-500 animate-bounce" />
-                  <span className="text-[9px] font-black tracking-widest text-slate-400 dark:text-zinc-500 uppercase">AI Credit Score</span>
-                </div>
-                <h3 className="text-4xl font-heading font-black text-emerald-500 tracking-tighter">A+ VERIFIED</h3>
-                <p className="text-[10px] text-slate-400 dark:text-zinc-400 font-semibold mt-1">99.8% Tingkat Pengembalian Lancar</p>
-                <div className="mt-3.5 h-1.5 w-full bg-slate-100 dark:bg-zinc-950 rounded-full overflow-hidden">
-                  <motion.div 
-                    animate={{ width: ["0%", "99%", "99%"] }}
-                    transition={{ repeat: Infinity, duration: 8, ease: "easeInOut" }}
-                    className="h-full bg-gradient-to-r from-emerald-400 to-emerald-600 rounded-full" 
-                  />
+                <Image src="/madu.png" alt="Madu Desa" fill className="object-cover" priority />
+                <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/90 via-zinc-950/20 to-transparent flex items-end p-6 lg:p-8">
+                  <div>
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-white text-[10px] font-bold mb-3 border border-white/20">
+                      <Star className="w-3 h-3 text-amber-400 fill-amber-400" /> Premium Product
+                    </div>
+                    <h3 className="text-2xl lg:text-3xl font-black text-white drop-shadow-md tracking-tight">Madu Fajar Asli</h3>
+                    <p className="text-xs lg:text-sm text-white/80 font-semibold mt-1">Desa Tani Sari, Nusantara</p>
+                  </div>
                 </div>
               </motion.div>
 
-              {/* Stylized visual layout representation */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.8 }}
-                className="w-80 h-80 bg-gradient-to-br from-slate-200 to-slate-100 dark:from-zinc-900 dark:to-zinc-950 rounded-[3.5rem] shadow-inner border border-slate-200/80 dark:border-zinc-800/80 relative overflow-hidden flex items-center justify-center"
+              {/* Interactive Card 1: AI Credit Score (Floating Top Left) */}
+              <motion.div 
+                initial={{ opacity: 0, x: -50, y: 50 }}
+                animate={{ opacity: 1, x: 0, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.3, type: "spring" }}
+                className="absolute top-4 lg:top-12 left-0 lg:-left-12 z-20"
               >
-                <div className="absolute inset-0 grid-bg opacity-30 pointer-events-none" />
                 <motion.div
-                  animate={{
-                    rotate: 360,
-                  }}
-                  transition={{
-                    repeat: Infinity,
-                    duration: 25,
-                    ease: "linear",
-                  }}
-                  className="w-64 h-64 border border-dashed border-emerald-500/30 dark:border-emerald-500/20 rounded-full flex items-center justify-center"
+                  animate={{ y: [-8, 8, -8] }}
+                  transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
+                  whileHover={{ scale: 1.05 }}
+                  className="w-[220px] lg:w-[240px] bg-white/20 dark:bg-black/40 backdrop-blur-2xl border border-white/30 dark:border-white/10 p-5 rounded-[2rem] shadow-2xl cursor-pointer"
                 >
-                  <div className="w-48 h-48 border border-dashed border-blue-500/30 dark:border-blue-500/20 rounded-full flex items-center justify-center">
-                    <div className="w-32 h-32 bg-gradient-to-tr from-emerald-500/10 to-blue-500/10 rounded-full blur-xl animate-pulse" />
-                  </div>
+                   <div className="flex items-center gap-2 mb-3">
+                     <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                       <Sparkles className="w-4 h-4 text-emerald-400" />
+                     </div>
+                     <div>
+                       <p className="text-[9px] font-black tracking-widest text-emerald-600 dark:text-emerald-400 uppercase">AI Verified</p>
+                       <h4 className="font-bold text-slate-900 dark:text-white text-sm">Credit Score A+</h4>
+                     </div>
+                   </div>
+                   <div className="h-1.5 w-full bg-slate-200/50 dark:bg-white/10 rounded-full overflow-hidden">
+                     <motion.div 
+                       initial={{ width: "0%" }}
+                       animate={{ width: "99%" }}
+                       transition={{ duration: 1.5, delay: 0.8 }}
+                       className="h-full bg-gradient-to-r from-emerald-400 to-cyan-400 rounded-full" 
+                     />
+                   </div>
                 </motion.div>
-                
-                <Leaf className="w-14 h-14 text-emerald-500/60 dark:text-emerald-400/40 absolute animate-pulse" />
+              </motion.div>
+
+              {/* Interactive Card 2: Live Transaksi (Floating Bottom Right) */}
+              <motion.div 
+                initial={{ opacity: 0, x: 50, y: -50 }}
+                animate={{ opacity: 1, x: 0, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.4, type: "spring" }}
+                className="absolute bottom-4 lg:bottom-12 right-0 lg:-right-12 z-20"
+              >
+                <motion.div
+                  animate={{ y: [8, -8, 8] }}
+                  transition={{ repeat: Infinity, duration: 7, ease: "easeInOut" }}
+                  whileHover={{ scale: 1.05 }}
+                  className="w-[260px] lg:w-[280px] bg-white/20 dark:bg-black/40 backdrop-blur-2xl border border-white/30 dark:border-white/10 p-4 rounded-[2rem] shadow-2xl cursor-pointer"
+                >
+                   <div className="flex items-center gap-3">
+                       <div className="w-10 h-10 relative flex-shrink-0 bg-white/30 dark:bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center p-2 border border-white/20">
+                         <Image src="/favicon.png" alt="Transaction" fill className="object-contain p-2" />
+                       </div>
+                       <div className="flex-1 min-w-0">
+                         <p className="text-[9px] font-black tracking-widest text-blue-600 dark:text-blue-400 uppercase mb-0.5">Live Transaksi</p>
+                         <AnimatePresence mode="wait">
+                           <motion.div
+                             key={currentTxIndex}
+                             initial={{ opacity: 0, y: 5 }}
+                             animate={{ opacity: 1, y: 0 }}
+                             exit={{ opacity: 0, y: -5 }}
+                             transition={{ duration: 0.3 }}
+                           >
+                             <h4 className="font-extrabold text-xs text-slate-900 dark:text-white truncate">{activeTx.name}</h4>
+                             <div className="flex justify-between items-center mt-0.5">
+                               <span className="text-[10px] text-slate-600 dark:text-zinc-300 font-semibold truncate pr-2">{activeTx.action}</span>
+                               <span className="text-emerald-600 dark:text-emerald-400 font-black text-[10px] whitespace-nowrap">{activeTx.value}</span>
+                             </div>
+                           </motion.div>
+                         </AnimatePresence>
+                       </div>
+                   </div>
+                </motion.div>
               </motion.div>
 
             </div>
