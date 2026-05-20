@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="id" class="bg-slate-50">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Mitra UMKM - Koneksi Desa</title>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap"
+        rel="stylesheet">
+    <script src="js/tailwind-config.js"></script>
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body class="text-slate-800 font-sans antialiased overflow-hidden h-screen flex" x-data="umkmApp()" x-init="initApp()">
+    <!-- Sidebar (Emerald Theme) -->
+    <div class="fixed inset-0 bg-slate-900/50 z-40 lg:hidden" x-show="sidebarOpen" x-transition.opacity
+        @click="sidebarOpen = false" x-cloak></div>
+    <aside
+        class="fixed lg:static inset-y-0 left-0 z-50 w-80 bg-slate-900 text-slate-300 flex flex-col transition-transform duration-300 shadow-2xl lg:shadow-none"
+        :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'">
+        <div
+            class="h-16 flex items-center px-6 bg-emerald-950 border-b border-emerald-900 font-heading font-bold text-xl text-white tracking-tight">
+            Koneksi<span class="text-emerald-500">Desa</span> <span
+                class="ml-2 text-[10px] bg-emerald-800/50 text-emerald-400 px-2 rounded uppercase tracking-widest font-sans border border-emerald-700/50">Mitra</span>
+        </div>
+        <div class="flex-1 overflow-y-auto py-6 px-4 space-y-1">
+            <p class="px-3 text-xs font-bold uppercase tracking-wider text-slate-500 mb-2 mt-2">Insight & Performa</p>
+            <a href="index.html"
+                class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-emerald-600/20 text-emerald-500 font-bold transition border border-emerald-500/20"><i
+                    data-lucide="pie-chart" class="w-5 h-5"></i> Dashboard Insight Bisnis</a>
+            <p class="px-3 text-xs font-bold uppercase tracking-wider text-slate-500 mb-2 mt-8">Operasional Toko</p>
+            <a href="produk.html"
+                class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white font-medium transition"><i
+                    data-lucide="package" class="w-5 h-5"></i> Manajemen Katalog Produk</a>
+            <a href="ai-harga.html"
+                class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white font-medium transition"><i
+                    data-lucide="sparkles" class="w-5 h-5"></i> AI Rekomendasi Harga</a>
+            <a href="pesanan.html"
+                class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white font-medium transition"><i
+                    data-lucide="shopping-cart" class="w-5 h-5"></i> Manajemen Pesanan <span
+                    class="bg-rose-500 text-white rounded-full px-2 text-xs font-bold ml-auto">2</span></a>
+            <p class="px-3 text-xs font-bold uppercase tracking-wider text-slate-500 mb-2 mt-8">Modal & Kelayakan</p>
+            <a href="pinjaman.html"
+                class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white font-medium transition"><i
+                    data-lucide="hand-coins" class="w-5 h-5"></i> Pengajuan Pendanaan</a>
+            <a href="skor.html"
+                class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white font-medium transition"><i
+                    data-lucide="activity" class="w-5 h-5"></i> Monitoring Skor Kelayakan</a>
+            <p class="px-3 text-xs font-bold uppercase tracking-wider text-slate-500 mb-2 mt-8">Komunikasi</p>
+            <a href="chat.html"
+                class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white font-medium transition"><i
+                    data-lucide="message-square" class="w-5 h-5"></i> Chat</a>
+        </div>
+        <div class="p-4 border-t border-slate-800">
+            <a href="../index.html"
+                class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-red-500/10 text-red-500 font-bold transition w-full"><i
+                    data-lucide="log-out" class="w-5 h-5"></i> Tutup Kios</a>
+        </div>
+    </aside>
+    <!-- Main Wrapper -->
+    <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+        <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 z-10 shrink-0">
+            <div class="flex items-center gap-4">
+                <button @click="sidebarOpen = true" class="lg:hidden text-slate-500"><i data-lucide="menu"
+                        class="w-5 h-5"></i></button>
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center"><i
+                            data-lucide="store" class="w-4 h-4"></i></div>
+                    <h1 class="text-xl font-heading font-bold text-slate-900 hidden sm:block">Koperasi Tani Rejo (ID:
+                        MTR-921)</h1>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <div x-data="{ tokoBuka: true }"
+                    class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-200 bg-slate-50">
+                    <span class="text-xs font-bold uppercase tracking-wider"
+                        :class="tokoBuka ? 'text-emerald-600' : 'text-slate-400'"
+                        x-text="tokoBuka ? 'Toko Buka' : 'Toko Tutup'"></span>
+                    <button @click="tokoBuka = !tokoBuka" :class="tokoBuka ? 'bg-emerald-500' : 'bg-slate-300'"
+                        class="w-9 h-5 rounded-full relative transition-colors cursor-pointer focus:outline-none shadow-inner">
+                        <div :class="tokoBuka ? 'translate-x-4' : 'translate-x-0'"
+                            class="w-5 h-5 bg-white rounded-full shadow absolute top-0 left-0 transition-transform scale-90">
+                        </div>
+                    </button>
+                </div>
+                <div class="w-px h-6 bg-slate-200 hidden sm:block"></div>
+                <!-- Notification Bell -->
+                <div x-data="{ openNotif: false }" class="relative z-50">
+                    <button @click="openNotif = !openNotif" @click.outside="openNotif = false"
+                        class="relative p-2 text-slate-400 hover:text-emerald-600 transition focus:outline-none cursor-pointer">
+                        <i data-lucide="bell" class="w-5 h-5"></i>
+                        <span
+                            class="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full animate-pulse border border-white"></span>
+                    </button>
+                    <div x-show="openNotif" x-transition.opacity.duration.200ms
+                        class="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden z-[100] text-left"
+                        x-cloak>
+                        <div class="p-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                            <h3 class="font-bold text-slate-900 text-sm">Notifikasi</h3><span
+                                class="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold">3
+                                Baru</span>
+                        </div>
+                        <div class="max-h-80 overflow-y-auto divide-y divide-slate-100">
+                            <a href="chat.html" class="block p-4 hover:bg-slate-50 transition bg-emerald-50/30">
+                                <p class="text-xs font-bold text-slate-900 mb-0.5 flex justify-between">Chat Baru <span
+                                        class="text-[10px] text-emerald-600">Budi S.</span></p>
+                                <p class="text-xs text-slate-500 line-clamp-1">Halo Min, Kopi 1Kg masih ready buat
+                                    dikirim hari ini ga?</p>
+                            </a>
+                            <a href="pesanan.html" class="block p-4 hover:bg-slate-50 transition bg-slate-50/50">
+                                <p class="text-xs font-bold text-slate-900 mb-0.5 flex justify-between">Order #TRX-8291A
+                                    <span class="text-[10px] text-slate-400">2j lalu</span></p>
+                                <p class="text-xs text-slate-500 line-clamp-1">Menunggu diproses kemas oleh Anda.</p>
+                            </a>
+                            <a href="pinjaman.html" class="block p-4 hover:bg-slate-50 transition">
+                                <p class="text-xs font-bold text-slate-900 mb-0.5 flex justify-between">Bursa Modal AI
+                                    <span class="text-[10px] text-slate-400">Kemarin</span></p>
+                                <p class="text-xs text-slate-500 line-clamp-2">Selamat, pendanaan Ekspansi Lahan Tahap 1
+                                    Anda telah terkumpul 100%.</p>
+                            </a>
+                        </div>
+                        <div class="p-3 border-t border-slate-100 text-center"><button
+                                class="text-xs font-bold text-emerald-600 hover:text-emerald-700">Tandai semua
+                                dibaca</button></div>
+                    </div>
+                </div>
+                <div class="w-px h-6 bg-slate-200"></div>
+                <img src="https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=200&q=80"
+                    class="w-9 h-9 rounded-full object-cover border border-slate-200">
+            </div>
+        </header>
+        <main class="flex-1 overflow-y-auto bg-slate-50 p-4 md:p-8">
+            <div class="max-w-7xl mx-auto space-y-6">
+                <div
+                    class="bg-gradient-to-r from-emerald-600 to-emerald-800 rounded-3xl p-8 text-white shadow-lg relative overflow-hidden mb-8">
+                    <div class="absolute right-0 bottom-0 opacity-10"><i data-lucide="trending-up"
+                            class="w-64 h-64 -mb-12 -mr-12"></i></div>
+                    <div class="relative z-10">
+                        <p class="text-emerald-200 font-bold text-sm uppercase tracking-wider mb-2">Penjualan Kotor
+                            Bulan Ini</p>
+                        <h2 class="text-4xl md:text-5xl font-black mb-6">Rp 12,450,000</h2>
+                        <div class="flex gap-4">
+                            <button onclick="window.notif('Dana Dicairkan', 'Rp 12.450.000 diproses ke rekening Anda.')"
+                                onclick="window.notif('Dana Dicairkan', 'Rp 12.450.000 diproses ke rekening Anda.')"
+                                class="bg-white text-emerald-700 px-6 py-2.5 rounded-xl font-bold shadow-sm hover:bg-emerald-50 transition">Cairkan
+                                ke Bank</button>
+                            <button onclick="window.notif('Riwayat Transaksi', 'Bulan lalu: 2x pencairan berhasil.')"
+                                onclick="window.notif('Riwayat Transaksi', 'Bulan lalu: 2x pencairan berhasil.')"
+                                class="bg-emerald-700 hover:bg-emerald-600 border border-emerald-500 text-white px-6 py-2.5 rounded-xl font-bold transition">Riwayat
+                                Pencairan</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex gap-4">
+                        <div
+                            class="w-12 h-12 bg-blue-50 text-blue-500 rounded-xl flex items-center justify-center shrink-0">
+                            <i data-lucide="users" class="w-6 h-6"></i></div>
+                        <div>
+                            <p class="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">Pengunjung Kios
+                            </p>
+                            <h3 class="text-2xl font-black text-slate-900">4,210 <span
+                                    class="text-emerald-500 text-sm font-bold ml-2">↑ 12%</span></h3>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex gap-4">
+                        <div
+                            class="w-12 h-12 bg-emerald-50 text-emerald-500 rounded-xl flex items-center justify-center shrink-0">
+                            <i data-lucide="package-check" class="w-6 h-6"></i></div>
+                        <div>
+                            <p class="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">Produk Terjual</p>
+                            <h3 class="text-2xl font-black text-slate-900">142 Item</h3>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex gap-4">
+                        <div
+                            class="w-12 h-12 bg-amber-50 text-amber-500 rounded-xl flex items-center justify-center shrink-0">
+                            <i data-lucide="star" class="w-6 h-6"></i></div>
+                        <div>
+                            <p class="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">Rating Kepuasan
+                            </p>
+                            <h3 class="text-2xl font-black text-slate-900">4.8 / 5.0</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                        <h3 class="font-bold text-slate-900 mb-6">Omset Mingguan (Rp Ribu)</h3>
+                        <div class="h-[250px] w-full"><canvas id="salesChart"></canvas></div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-bold text-slate-900">Pesanan Masuk</h3>
+                            <a href="pesanan.html" class="text-xs font-bold text-emerald-600 hover:underline">Kelola</a>
+                        </div>
+                        <div class="space-y-4">
+                            <div
+                                class="p-3 border border-slate-100 rounded-xl hover:border-blue-200 hover:bg-blue-50/50 transition cursor-pointer">
+                                <div class="flex justify-between mb-1"><span
+                                        class="text-slate-900 font-bold text-sm">#TRX-8291A</span><span
+                                        class="text-rose-500 text-[10px] font-bold bg-rose-50 px-2 py-0.5 rounded border border-rose-100">Batas:
+                                        2 Jam</span></div>
+                                <p class="text-xs text-slate-500">2x Biji Kopi Arabica Premium</p>
+                            </div>
+                            <div
+                                class="p-3 border border-slate-100 rounded-xl hover:border-blue-200 hover:bg-blue-50/50 transition cursor-pointer">
+                                <div class="flex justify-between mb-1"><span
+                                        class="text-slate-900 font-bold text-sm">#TRX-8100C</span><span
+                                        class="text-amber-500 text-[10px] font-bold bg-amber-50 px-2 py-0.5 rounded border border-amber-100">Menunggu
+                                        Pickup</span></div>
+                                <p class="text-xs text-slate-500">1x Gula Aren Cair 500ml</p>
+                            </div>
+                        </div>
+                        <button onclick="window.location.href='produk.html'"
+                            class="w-full py-3 mt-6 rounded-xl border-2 border-dashed border-emerald-200 text-emerald-600 font-bold hover:bg-emerald-50 transition drop-shadow-sm"><i
+                                data-lucide="plus" class="w-4 h-4 inline mr-1"></i> Tambah Etalase Produk</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="js/index.js"></script>
+    <!-- Global Toast Notif -->
+    <div x-data="{ toasts: [] }"
+        @show-toast.window="let id = Date.now(); toasts.push({id, ...$event.detail}); setTimeout(() => { toasts = toasts.filter(t => t.id !== id) }, 6000)"
+        class="fixed bottom-4 right-4 z-[999] flex flex-col gap-2 pointer-events-none">
+        <template x-for="t in toasts" :key="t.id">
+            <div x-show="true" x-transition.opacity.translate.y.50px
+                class="bg-white border-l-4 shadow-xl rounded-r-2xl p-4 w-72 sm:w-80 flex gap-3 pointer-events-auto transform transition-all hover:bg-slate-50 relative overflow-hidden group"
+                :class="t.type === 'success' ? 'border-emerald-500' : 'border-blue-500'">
+                <div class="flex-1 min-w-0 cursor-pointer" @click="if(t.url) window.location.href=t.url">
+                    <p class="text-sm font-bold text-slate-900 truncate pr-6" x-text="t.title"></p>
+                    <p class="text-xs text-slate-600 line-clamp-2 mt-0.5" x-text="t.text"></p>
+                </div>
+                <button @click="toasts = toasts.filter(x => x.id !== t.id)"
+                    class="text-slate-300 hover:text-rose-500 focus:outline-none transition absolute top-4 right-3 bg-white pl-2">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 6 6 18" />
+                        <path d="m6 6 12 12" />
+                    </svg>
+                </button>
+            </div>
+        </template>
+    </div>
+    <script src="js/global.js"></script>
+</body>

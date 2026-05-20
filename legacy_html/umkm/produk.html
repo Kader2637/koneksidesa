@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="id" class="bg-slate-50">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Etalase Produk - Mitra UMKM</title>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap"
+        rel="stylesheet">
+    <script src="js/tailwind-config.js"></script>
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body class="text-slate-800 font-sans antialiased h-screen flex overflow-hidden" x-data="produkApp()"
+    x-init="initApp()">
+    <!-- Sidebar -->
+    <div class="fixed inset-0 bg-slate-900/50 z-40 lg:hidden" x-show="sidebarOpen" x-transition.opacity
+        @click="sidebarOpen = false" x-cloak></div>
+    <aside
+        class="fixed lg:static inset-y-0 left-0 z-50 w-80 bg-slate-900 text-slate-300 flex flex-col transition-transform duration-300 shadow-2xl lg:shadow-none"
+        :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'">
+        <div
+            class="h-16 flex items-center px-6 bg-emerald-950 border-b border-emerald-900 font-heading font-bold text-xl text-white tracking-tight">
+            Koneksi<span class="text-emerald-500">Desa</span> <span
+                class="ml-2 text-[10px] bg-emerald-800/50 text-emerald-400 px-2 rounded uppercase tracking-widest font-sans border border-emerald-700/50">Mitra</span>
+        </div>
+        <div class="flex-1 overflow-y-auto py-6 px-4 space-y-1">
+            <p class="px-3 text-xs font-bold uppercase tracking-wider text-slate-500 mb-2 mt-2">Insight & Performa</p>
+            <a href="index.html"
+                class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white font-medium transition"><i
+                    data-lucide="pie-chart" class="w-5 h-5"></i> Dashboard Insight Bisnis</a>
+            <p class="px-3 text-xs font-bold uppercase tracking-wider text-slate-500 mb-2 mt-8">Operasional Toko</p>
+            <a href="produk.html"
+                class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-emerald-600/20 text-emerald-500 font-bold transition border border-emerald-500/20"><i
+                    data-lucide="package" class="w-5 h-5"></i> Manajemen Katalog Produk</a>
+            <a href="ai-harga.html"
+                class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white font-medium transition"><i
+                    data-lucide="sparkles" class="w-5 h-5"></i> AI Rekomendasi Harga</a>
+            <a href="pesanan.html"
+                class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white font-medium transition"><i
+                    data-lucide="shopping-cart" class="w-5 h-5"></i> Manajemen Pesanan</a>
+            <p class="px-3 text-xs font-bold uppercase tracking-wider text-slate-500 mb-2 mt-8">Modal & Kelayakan</p>
+            <a href="pinjaman.html"
+                class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white font-medium transition"><i
+                    data-lucide="hand-coins" class="w-5 h-5"></i> Pengajuan Pendanaan</a>
+            <a href="skor.html"
+                class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white font-medium transition"><i
+                    data-lucide="activity" class="w-5 h-5"></i> Monitoring Skor Kelayakan</a>
+            <p class="px-3 text-xs font-bold uppercase tracking-wider text-slate-500 mb-2 mt-8">Komunikasi</p>
+            <a href="chat.html"
+                class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white font-medium transition"><i
+                    data-lucide="message-square" class="w-5 h-5"></i> Chat</a>
+        </div>
+    </aside>
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+        <header
+            class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 z-10 shrink-0">
+            <div class="flex items-center gap-4">
+                <button @click="sidebarOpen = true" class="lg:hidden text-slate-500"><i data-lucide="menu"
+                        class="w-5 h-5"></i></button>
+                <h1 class="text-lg font-heading font-bold text-slate-900">Manajemen Etalase</h1>
+            </div>
+            <button @click="showAdd = true"
+                class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-md shadow-emerald-500/20 transition flex items-center gap-2"><i
+                    data-lucide="plus" class="w-4 h-4"></i> <span class="hidden sm:inline">Tambah Produk</span></button>
+        </header>
+        <main class="flex-1 overflow-y-auto p-4 md:p-8">
+            <div class="max-w-7xl mx-auto">
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div
+                        class="p-4 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4">
+                        <div class="relative w-full sm:w-64">
+                            <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-slate-400"></i>
+                            <input type="text" x-model="search" placeholder="Cari produk..."
+                                class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:border-emerald-500 outline-none">
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm whitespace-nowrap">
+                            <thead class="bg-slate-50/50 text-slate-500 font-bold uppercase tracking-wider">
+                                <tr>
+                                    <th class="px-6 py-4">Foto & Detail ProdUk</th>
+                                    <th class="px-6 py-4 border-l border-slate-100">Kategori</th>
+                                    <th class="px-6 py-4 border-l border-slate-100">Harga</th>
+                                    <th class="px-6 py-4 border-l border-slate-100">Stok</th>
+                                    <th class="px-6 py-4 border-l border-slate-100 text-right">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                <template x-for="p in filteredList" :key="p.id">
+                                    <tr class="hover:bg-slate-50/50 transition">
+                                        <td class="px-6 py-4">
+                                            <div class="flex items-center gap-4">
+                                                <img :src="p.img"
+                                                    class="w-12 h-12 rounded-lg object-cover border border-slate-200 shrink-0">
+                                                <div>
+                                                    <p class="font-bold text-slate-900" x-text="p.name"></p>
+                                                    <p class="text-[10px] text-slate-400 font-mono mt-0.5">ID: SKU-<span
+                                                            x-text="p.id"></span></p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 border-l border-slate-100 text-slate-600 font-medium"
+                                            x-text="p.cat"></td>
+                                        <td class="px-6 py-4 border-l border-slate-100 font-bold text-emerald-600"
+                                            x-text="'Rp ' + p.price"></td>
+                                        <td class="px-6 py-4 border-l border-slate-100">
+                                            <span class="px-2.5 py-1 rounded-md text-xs font-bold"
+                                                :class="p.stock < 10 ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700'"
+                                                x-text="p.stock + ' Pcs'"></span>
+                                        </td>
+                                        <td class="px-6 py-4 border-l border-slate-100 text-right">
+                                            <button
+                                                @click.stop="window.dispatchEvent(new CustomEvent('open-detail', {detail: p}))"
+                                                class="p-2 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition border border-transparent hover:border-emerald-200"
+                                                title="Lihat Detail"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                                            <button
+                                                @click.stop="window.notif('Mode Edit', 'Mengakses panel ubah produk');"
+                                                class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                                                title="Edit"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                            <button @click.stop="del(p.id)"
+                                                class="p-2 text-rose-600 hover:bg-rose-50 rounded-lg transition"
+                                                title="Hapus"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                        <div x-show="filteredList.length === 0" class="p-8 text-center text-slate-500">Tidak ada produk
+                            yang cocok dengan pencarian.</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <!-- Tambah Produk Modal -->
+    <div x-show="showAdd"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" x-cloak>
+        <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                <h2 class="font-bold text-lg text-slate-900">Upload Produk Baru</h2>
+                <button @click="showAdd = false" class="text-slate-400 hover:text-slate-700"><i data-lucide="x"
+                        class="w-5 h-5"></i></button>
+            </div>
+            <div class="p-6 overflow-y-auto space-y-4">
+                <div
+                    class="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center hover:bg-slate-50 transition cursor-pointer">
+                    <i data-lucide="image-plus" class="w-8 h-8 text-slate-400 mx-auto mb-2"></i>
+                    <p class="text-sm font-bold text-slate-700">Klik untuk upload foto</p>
+                    <p class="text-xs text-slate-400">Rekomendasi 1:1, Max 2MB</p>
+                </div>
+                <div><label class="block text-xs font-bold text-slate-500 mb-1">Nama Produk</label><input type="text"
+                        class="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:border-emerald-500">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label class="block text-xs font-bold text-slate-500 mb-1">Kategori</label>
+                        <select
+                            class="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:border-emerald-500">
+                            <option>Agrikultur</option>
+                            <option>Kriya & Seni</option>
+                            <option>Konsumsi</option>
+                        </select>
+                    </div>
+                    <div><label class="block text-xs font-bold text-slate-500 mb-1">Stok (Pcs)</label><input
+                            type="number"
+                            class="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:border-emerald-500">
+                    </div>
+                </div>
+                <div><label class="block text-xs font-bold text-slate-500 mb-1">Harga (Rp)</label><input type="number"
+                        class="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:border-emerald-500">
+                </div>
+                <div><label class="block text-xs font-bold text-slate-500 mb-1">Deskripsi Singkat</label><textarea
+                        class="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:border-emerald-500 h-24"></textarea>
+                </div>
+            </div>
+            <div class="p-6 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-3">
+                <button @click="showAdd = false"
+                    class="px-5 py-2.5 rounded-xl font-bold text-slate-600 hover:bg-slate-200 transition">Batal</button>
+                <button @click="showAdd = false"
+                    class="px-5 py-2.5 rounded-xl font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition">Simpan
+                    Live</button>
+            </div>
+        </div>
+    </div>
+    <script src="js/produk.js"></script>
+    <!-- Global Toast Notif -->
+    <div x-data="{ toasts: [] }"
+        @show-toast.window="let id = Date.now(); toasts.push({id, ...$event.detail}); setTimeout(() => { toasts = toasts.filter(t => t.id !== id) }, 6000)"
+        class="fixed bottom-4 right-4 z-[999] flex flex-col gap-2 pointer-events-none">
+        <template x-for="t in toasts" :key="t.id">
+            <div x-show="true" x-transition.opacity.translate.y.50px
+                class="bg-white border-l-4 shadow-xl rounded-r-2xl p-4 w-72 sm:w-80 flex gap-3 pointer-events-auto transform transition-all hover:bg-slate-50 relative overflow-hidden group"
+                :class="t.type === 'success' ? 'border-emerald-500' : 'border-blue-500'">
+                <div class="flex-1 min-w-0 cursor-pointer" @click="if(t.url) window.location.href=t.url">
+                    <p class="text-sm font-bold text-slate-900 truncate pr-6" x-text="t.title"></p>
+                    <p class="text-xs text-slate-600 line-clamp-2 mt-0.5" x-text="t.text"></p>
+                </div>
+                <button @click="toasts = toasts.filter(x => x.id !== t.id)"
+                    class="text-slate-300 hover:text-rose-500 focus:outline-none transition absolute top-4 right-3 bg-white pl-2">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 6 6 18" />
+                        <path d="m6 6 12 12" />
+                    </svg>
+                </button>
+            </div>
+        </template>
+    </div>
+    <script src="js/global.js"></script>
+    <!-- Product Detail Modal (Dummy) -->
+    <div x-data="{ dOpen: false, p: {} }"
+        @open-detail.window="dOpen = true; p = $event.detail; setTimeout(() => { if(window.lucide) lucide.createIcons(); }, 50);"
+        x-show="dOpen" class="fixed inset-0 z-[100] flex items-center justify-center pointer-events-none" x-cloak>
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm pointer-events-auto transition-opacity"
+            x-show="dOpen" x-transition.opacity @click="dOpen = false"></div>
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-3xl m-4 pointer-events-auto transform transition-all relative overflow-hidden flex flex-col max-h-[90vh]"
+            x-show="dOpen" x-transition.scale.95>
+            <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0 z-10">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center">
+                        <i data-lucide="info" class="w-5 h-5"></i></div>
+                    <h3 class="font-bold text-slate-900 leading-none text-lg">Informasi Detail Produk</h3>
+                </div>
+                <button @click="dOpen = false"
+                    class="p-2 bg-slate-50 text-slate-500 hover:text-rose-500 rounded-full transition"><i
+                        data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="p-5 md:p-8 overflow-y-auto w-full bg-slate-50 custom-scroll relative">
+                <div
+                    class="bg-white p-6 rounded-2xl border border-slate-200 flex flex-col md:flex-row gap-6 md:gap-8 mb-6 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] relative overflow-hidden">
+                    <div
+                        class="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-bl-full -mr-10 -mt-10 opacity-50 pointer-events-none">
+                    </div>
+                    <img :src="p.img"
+                        class="w-full md:w-56 h-56 rounded-2xl object-cover border border-slate-200 shrink-0 shadow-md relative z-10">
+                    <div class="flex-1 relative z-10 flex flex-col">
+                        <div>
+                            <span
+                                class="inline-block px-2.5 py-1 mb-2 bg-emerald-100 border border-emerald-200 text-emerald-700 text-[10px] font-bold uppercase rounded tracking-wider"
+                                x-text="p.category"></span>
+                            <h2 class="text-2xl font-black text-slate-900 mb-2 leading-tight" x-text="p.name"></h2>
+                            <h3 class="text-2xl font-black text-emerald-600 mb-4"
+                                x-text="'Rp ' + (p.price ? parseInt(p.price).toLocaleString('id-ID') : '0')"></h3>
+                        </div>
+                        <p class="text-sm text-slate-600 leading-relaxed mb-6 mt-auto">Produk ini merupakan komoditas
+                            unggulan tersertifikasi yang dipasok langsung dari kelompok petani lokal. Diproses dengan
+                            standar kebersihan tinggi tanpa campuran bahan kimia buatan, menjamin kualitas natural.</p>
+                        <div class="flex gap-4 w-full">
+                            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 text-center flex-1">
+                                <p class="text-[10px] text-slate-400 font-bold uppercase mb-1">Status Stok</p>
+                                <p class="font-black text-slate-700 text-lg" x-text="(p.stock || 0) + ' Unit'"></p>
+                            </div>
+                            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 text-center flex-1">
+                                <p class="text-[10px] text-slate-400 font-bold uppercase mb-1">Total Terjual</p>
+                                <p class="font-black text-slate-700 text-lg">142 Unit</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+                    <div
+                        class="p-5 border-b border-slate-100 bg-slate-50/50 font-bold text-slate-800 text-sm flex items-center gap-2">
+                        <i data-lucide="list" class="w-4 h-4 text-slate-400"></i> Spesifikasi Lengkap</div>
+                    <div class="divide-y divide-slate-100">
+                        <div class="flex p-5 hover:bg-slate-50 transition">
+                            <div class="w-1/3 text-xs font-bold text-slate-500 uppercase tracking-wider">Berat Kotor
+                                (Gross)</div>
+                            <div class="w-2/3 text-sm text-slate-800 font-medium">1050 Gram (1.05 Kg)</div>
+                        </div>
+                        <div class="flex p-5 hover:bg-slate-50 transition">
+                            <div class="w-1/3 text-xs font-bold text-slate-500 uppercase tracking-wider">Batas
+                                Kedaluwarsa</div>
+                            <div class="w-2/3 text-sm text-slate-800 font-medium">12 Bulan (Semenjak Tanggal Kirim)
+                            </div>
+                        </div>
+                        <div class="flex p-5 hover:bg-slate-50 transition">
+                            <div class="w-1/3 text-xs font-bold text-slate-500 uppercase tracking-wider">Izin Badan
+                                Resmi</div>
+                            <div
+                                class="w-2/3 text-sm text-emerald-600 font-bold bg-emerald-50 px-3 py-1 rounded inline-block w-max">
+                                P-IRT: 2103573012938-23</div>
+                        </div>
+                        <div class="flex p-5 hover:bg-slate-50 transition">
+                            <div class="w-1/3 text-xs font-bold text-slate-500 uppercase tracking-wider">Sistem
+                                Pengepakan</div>
+                            <div class="w-2/3 text-sm text-slate-800 font-medium">Kardus Ganda + Bubble Wrap Instan
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm mt-6">
+                    <div class="p-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                        <h4 class="font-bold text-slate-800 text-sm flex items-center gap-2"><i data-lucide="star"
+                                class="w-4 h-4 text-amber-400 fill-amber-400"></i> Ulasan & Komentar Pembeli</h4>
+                        <span
+                            class="font-black text-emerald-600 text-sm border border-emerald-200 bg-emerald-50 px-2 py-0.5 rounded">4.8
+                            / 5.0</span>
+                    </div>
+                    <div class="p-5 overflow-y-auto divide-y divide-slate-100">
+                        <div class="pb-5">
+                            <div class="flex gap-1 mb-2"><i data-lucide="star"
+                                    class="w-3.5 h-3.5 text-amber-400 fill-amber-400"></i><i data-lucide="star"
+                                    class="w-3.5 h-3.5 text-amber-400 fill-amber-400"></i><i data-lucide="star"
+                                    class="w-3.5 h-3.5 text-amber-400 fill-amber-400"></i><i data-lucide="star"
+                                    class="w-3.5 h-3.5 text-amber-400 fill-amber-400"></i><i data-lucide="star"
+                                    class="w-3.5 h-3.5 text-amber-400 fill-amber-400"></i></div>
+                            <p class="text-sm text-slate-700 italic leading-relaxed">"Kualitas sangat bagus, pengiriman
+                                juga lumayan cepat. Packing luar biasa tebal jadi aman sampai rumah. Terimakasih!"</p>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase mt-2">Budi Santoso • 2 Hari Lalu
+                            </p>
+                        </div>
+                        <div class="pt-5">
+                            <div class="flex gap-1 mb-2"><i data-lucide="star"
+                                    class="w-3.5 h-3.5 text-amber-400 fill-amber-400"></i><i data-lucide="star"
+                                    class="w-3.5 h-3.5 text-amber-400 fill-amber-400"></i><i data-lucide="star"
+                                    class="w-3.5 h-3.5 text-amber-400 fill-amber-400"></i><i data-lucide="star"
+                                    class="w-3.5 h-3.5 text-amber-400 fill-amber-400"></i><i data-lucide="star"
+                                    class="w-3.5 h-3.5 text-slate-200 fill-slate-200"></i></div>
+                            <p class="text-sm text-slate-700 italic leading-relaxed">"Sesuai ekspektasi, penjual
+                                responnya ramah banget. Kurir agak nyasar dikit ngirimnya."</p>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase mt-2">Siti Aminah • 4 Hari Lalu</p>
+                        </div>
+                        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 mt-4 flex gap-2 items-center">
+                            <input type="text" placeholder="Balas ulasan pembeli..."
+                                class="flex-1 bg-white outline-none border border-slate-200 py-2 px-3 rounded-lg text-sm focus:border-emerald-500 transition-colors">
+                            <button
+                                class="bg-emerald-600 hover:bg-emerald-700 transition-colors text-white text-xs font-bold px-4 py-2 rounded-lg shrink-0"
+                                @click="window.notif('Terkirim', 'Balasan Anda berhasil diposting publik.')">Balas /
+                                Kirim</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div
+                class="p-4 border-t border-slate-100 bg-white flex justify-between items-center shadow-[0_-4px_10px_rgba(0,0,0,0.02)] z-10">
+                <button onclick="window.notif('Tautan Disalin', 'Tautan bagikan produk terlah disalin ke clipboard')"
+                    class="text-emerald-600 font-bold hover:bg-emerald-50 px-4 py-2 rounded-xl transition flex items-center gap-2"><i
+                        data-lucide="share-2" class="w-4 h-4"></i> Bagikan</button>
+                <div class="flex gap-3">
+                    <button
+                        class="bg-blue-50 text-blue-600 hover:bg-blue-100 font-bold py-2 px-6 rounded-xl transition flex items-center gap-2"
+                        @click="dOpen = false; window.notif('Mode Edit', 'Berpindah panel untuk memperbarui info.')"><i
+                            data-lucide="edit" class="w-4 h-4"></i> Ubah Data</button>
+                    <button
+                        class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 px-8 rounded-xl transition"
+                        @click="dOpen = false">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>

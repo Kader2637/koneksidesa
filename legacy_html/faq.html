@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ - Koneksi Desa</title>
+
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <script>
+        tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'], heading: ['Outfit', 'sans-serif'] }, colors: { emerald: { 50: '#ecfdf5', 100: '#d1fae5', 400: '#34d399', 500: '#10b981', 600: '#059669', 700: '#047857', 900: '#064e3b' }, blue: { 50: '#eff6ff', 100: '#dbeafe', 400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 800: '#1e40af' }, slate: { 50: '#f8fafc', 800: '#1e293b', 900: '#0f172a' }, amber: { 400: '#fbbf24', 500: '#f59e0b', 600: '#d97706' } } } } }
+    </script>
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f8fafc;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #3b82f6;
+            border-radius: 4px;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-800 font-sans antialiased flex flex-col min-h-screen" x-data="faqApp()"
+    x-init="initApp()" :class="showLoginModal ? 'overflow-hidden' : ''">
+
+    <!-- Login Modal -->
+    <div x-show="showLoginModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4" x-cloak>
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="showLoginModal = false"
+            x-show="showLoginModal" x-transition.opacity></div>
+        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl z-10 p-8 transform relative overflow-hidden"
+            x-show="showLoginModal" x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 translate-y-8 scale-95"
+            x-transition:enter-end="opacity-100 translate-y-0 scale-100">
+            <button @click="showLoginModal = false"
+                class="absolute top-5 right-5 text-slate-400 hover:text-slate-700 transition bg-slate-100 p-2 rounded-full"><i
+                    data-lucide="x" class="w-4 h-4"></i></button>
+            <div class="text-center mb-8">
+                <div
+                    class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-emerald-500 to-blue-500 text-white shadow-lg mb-4">
+                    <i data-lucide="leaf" class="w-8 h-8"></i></div>
+                <h3 class="text-2xl font-heading font-bold text-slate-900">Masuk Platform</h3>
+            </div>
+            <div class="space-y-3">
+                <a href="admin/index.html"
+                    class="w-full flex items-center gap-4 p-4 border border-slate-200 rounded-2xl transition group hover:border-blue-500 hover:bg-blue-50">
+                    <div
+                        class="bg-slate-100 p-3 rounded-xl transition text-slate-500 group-hover:bg-blue-100 group-hover:text-blue-600">
+                        <i data-lucide="shield-check" class="w-5 h-5"></i></div>
+                    <div class="text-left flex-1">
+                        <h4 class="font-bold text-slate-900">Admin Desa</h4>
+                        <p class="text-xs text-slate-500">Sistem pengelola</p>
+                    </div><i data-lucide="chevron-right"
+                        class="w-5 h-5 text-slate-300 transition group-hover:text-blue-600"></i>
+                </a>
+                <a href="umkm/index.html"
+                    class="w-full flex items-center gap-4 p-4 border border-slate-200 rounded-2xl transition group hover:border-emerald-500 hover:bg-emerald-50">
+                    <div
+                        class="bg-slate-100 p-3 rounded-xl transition text-slate-500 group-hover:bg-emerald-100 group-hover:text-emerald-600">
+                        <i data-lucide="store" class="w-5 h-5"></i></div>
+                    <div class="text-left flex-1">
+                        <h4 class="font-bold text-slate-900">Mitra UMKM</h4>
+                    </div><i data-lucide="chevron-right"
+                        class="w-5 h-5 text-slate-300 transition group-hover:text-emerald-600"></i>
+                </a>
+                <a href="investor/index.html"
+                    class="w-full flex items-center gap-4 p-4 border border-slate-200 rounded-2xl transition group hover:border-amber-500 hover:bg-amber-50">
+                    <div
+                        class="bg-slate-100 p-3 rounded-xl transition text-slate-500 group-hover:bg-amber-100 group-hover:text-amber-600">
+                        <i data-lucide="trending-up" class="w-5 h-5"></i></div>
+                    <div class="text-left flex-1">
+                        <h4 class="font-bold text-slate-900">Investor</h4>
+                    </div><i data-lucide="chevron-right"
+                        class="w-5 h-5 text-slate-300 transition group-hover:text-amber-600"></i>
+                </a>
+                <a href="pembeli/index.html"
+                    class="w-full flex items-center gap-4 p-4 border border-slate-200 rounded-2xl transition group hover:border-purple-500 hover:bg-purple-50">
+                    <div
+                        class="bg-slate-100 p-3 rounded-xl transition text-slate-500 group-hover:bg-purple-100 group-hover:text-purple-600">
+                        <i data-lucide="shopping-bag" class="w-5 h-5"></i></div>
+                    <div class="text-left flex-1">
+                        <h4 class="font-bold text-slate-900">Pembeli</h4>
+                    </div><i data-lucide="chevron-right"
+                        class="w-5 h-5 text-slate-300 transition group-hover:text-purple-600"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="glass-panel sticky top-0 w-full z-40 px-6 py-4" id="navbar">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <a href="index.html" class="flex items-center gap-2 cursor-pointer group">
+                <div
+                    class="bg-gradient-to-br from-emerald-500 to-blue-600 p-2 rounded-lg text-white shadow-md group-hover:shadow-lg transition">
+                    <i data-lucide="leaf" class="w-6 h-6"></i></div>
+                <span class="text-xl font-heading font-bold text-slate-900 tracking-tight">Koneksi<span
+                        class="text-blue-600">Desa</span></span>
+            </a>
+            <div class="hidden lg:flex space-x-8 text-sm font-medium text-slate-600">
+                <a href="index.html" class="hover:text-blue-600 transition">Home</a>
+                <a href="katalog.html" class="hover:text-blue-600 transition">Katalog Desa</a>
+                <a href="investasi.html" class="hover:text-blue-600 transition">Peluang Investasi</a>
+                <a href="peta.html" class="hover:text-blue-600 transition">Peta UMKM</a>
+                <a href="statistik.html" class="hover:text-blue-600 transition">Statistik Desa</a>
+                <a href="faq.html" class="text-emerald-600 font-bold border-b-2 border-emerald-600 pb-1">FAQ</a>
+            </div>
+            <div class="flex items-center gap-3">
+                <button @click="showLoginModal = true" class="bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-500 hover:to-blue-500 text-white px-6 py-2.5 rounded-full text-sm font-bold transition shadow-md">Mulai Platform</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header Section -->
+    <section class="pt-20 pb-16 bg-blue-50 relative overflow-hidden" data-aos="fade-up">
+        <div class="max-w-4xl mx-auto px-6 text-center relative z-10">
+            <div
+                class="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-100 text-blue-700 rounded-full text-xs font-bold tracking-widest uppercase mb-6">
+                <i data-lucide="message-circle" class="w-4 h-4"></i> Pusat Bantuan</div>
+            <h1 class="text-4xl md:text-5xl font-heading font-extrabold text-slate-900 mb-6 tracking-tight">Apa yang
+                bisa kami bantu?</h1>
+
+            <div
+                class="bg-white border border-slate-200 px-6 py-3 rounded-full flex items-center gap-3 shadow-lg focus-within:border-blue-500 transition max-w-2xl mx-auto mb-8">
+                <i data-lucide="search" class="w-5 h-5 text-slate-400"></i>
+                <input type="text" placeholder="Ketik kata kunci pertanyaan di sini..."
+                    class="bg-transparent border-none outline-none text-base w-full text-slate-800">
+                <button
+                    class="bg-blue-600 text-white text-xs font-bold px-4 py-2 rounded-full hover:bg-blue-700 transition">Cari</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Accordion -->
+    <main class="flex-1 max-w-3xl mx-auto px-6 py-16 w-full" data-aos="fade-up">
+        <!-- Categories -->
+        <div class="flex flex-wrap justify-center gap-3 mb-12 border-b border-slate-200 pb-8">
+            <button class="px-6 py-2 bg-slate-900 text-white rounded-full text-sm font-bold shadow-md">Semua
+                Topik</button>
+            <button
+                class="px-6 py-2 bg-white text-slate-600 border border-slate-200 rounded-full text-sm font-bold hover:bg-slate-50 transition">Untuk
+                Pembeli</button>
+            <button
+                class="px-6 py-2 bg-white text-slate-600 border border-slate-200 rounded-full text-sm font-bold hover:bg-slate-50 transition">Untuk
+                Investor</button>
+            <button
+                class="px-6 py-2 bg-white text-slate-600 border border-slate-200 rounded-full text-sm font-bold hover:bg-slate-50 transition">Untuk
+                UMKM</button>
+        </div>
+
+        <div class="space-y-4">
+            <template x-for="(fq, index) in faqs" :key="index">
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 hover:border-blue-300 transition-colors overflow-hidden"
+                    x-data="{ open: false }">
+                    <button @click="open = !open"
+                        class="w-full text-left p-6 font-bold text-lg text-slate-900 outline-none flex justify-between items-center transition bg-white hover:bg-slate-50 group">
+                        <span x-text="fq.q"></span>
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center transition-all bg-blue-50 group-hover:bg-blue-100"
+                            :class="open ? 'rotate-180 bg-blue-600 text-white' : 'text-blue-600'">
+                            <i data-lucide="chevron-down" class="w-5 h-5" :class="open ? 'text-white' : ''"></i>
+                        </div>
+                    </button>
+                    <!-- Uses Alpine Collapse plugin directly -->
+                    <div x-show="open" x-collapse>
+                        <div class="p-6 pt-0 text-slate-600 leading-relaxed border-t border-slate-100 bg-slate-50/50 mt-2"
+                            x-html="fq.a"></div>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <div class="mt-16 text-center">
+            <p class="text-slate-600 mb-4">Masih tidak menemukan jawaban?</p>
+            <button
+                class="flex items-center gap-2 justify-center mx-auto text-emerald-600 font-bold border-2 border-emerald-600 px-8 py-3 rounded-full hover:bg-emerald-600 hover:text-white transition group"><i
+                    data-lucide="headphones" class="w-5 h-5"></i> Hubungi Customer Service</button>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 pt-16 pb-8 border-t border-slate-800 mt-auto">
+        <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+            <div class="col-span-1 md:col-span-2">
+                <div class="flex items-center gap-2 mb-6">
+                    <div class="bg-gradient-to-br from-emerald-500 to-blue-600 p-2 rounded-lg text-white"><i
+                            data-lucide="leaf" class="w-6 h-6"></i></div><span
+                        class="text-2xl font-heading font-bold text-white">Koneksi<span
+                            class="text-blue-500">Desa</span></span>
+                </div>
+                <p class="text-slate-400 leading-relaxed max-w-sm mb-8">Memelopori ekosistem berkelanjutan demi
+                    mewujudkan sirkulasi ekonomi desa yang terintegrasi.</p>
+            </div>
+            <div>
+                <h5 class="text-white font-bold mb-6 text-lg">Peta Situs</h5>
+                <ul class="space-y-4 text-sm text-slate-400 font-medium">
+                    <li><a href="index.html" class="hover:text-blue-400 transition">Beranda</a></li>
+                    <li><a href="katalog.html" class="hover:text-blue-400 transition">Katalog UMKM</a></li>
+                    <li><a href="investasi.html" class="hover:text-blue-400 transition">Investasi Desa</a></li>
+                    <li><a href="faq.html" class="hover:text-blue-400 transition">Pusat Bantuan</a></li>
+                </ul>
+            </div>
+        </div>
+        <div
+            class="max-w-7xl mx-auto px-6 pt-8 border-t border-slate-800/50 flex justify-between items-center text-sm text-slate-500">
+            <p>&copy; 2026 Platform Terpadu Koneksi Desa</p>
+            <p>Project by <span class="text-emerald-400 font-bold">Kharisma Khoirunisa P</span></p>
+        </div>
+    </footer>
+
+    <script>
+        function faqApp() {
+            return {
+                showLoginModal: false,
+                faqs: [
+                    { q: 'Bagaimana keamanan sistem investasi di sini?', a: 'Sistem menggunakan <strong>AI Credit Score</strong> terenkripsi untuk menilai kemampuan bayar UMKM berdasarkan data transaksi riil (omset harian) langsung dari dompet digital platform ini, menurunkan risiko default perbankan secara drastis.' },
+                    { q: 'Bisakah saya mendaftar UMKM secara gratis?', a: 'Pendaftaran 100% gratis. Silakan masuk, buat akun sebagai <strong>Mitra UMKM</strong>, lalu lengkapi dokumen digital (KTP, NIB). Kami akan memverifikasi dalam kurun waktu max 2x24 jam.' },
+                    { q: 'Bagaimana metode pengiriman produk katalog?', a: 'Dukungan sistem logistik regional dan kurir pihak ketiga telah terintegrasi sehingga estimasi resi pengiriman dapat dilacak persis secara otomatis dari <strong>Dashboard Pembeli</strong>.' },
+                    { q: 'Metode pembayaran apa saja yang disediakan?', a: 'Kami mendukung QRIS, Virtual Account (Mandiri, BCA, BNI, BRI), Kartu Kredit/Debit, hingga pembayaran cicilan bekerja sama dengan mitra pihak ketiga terpercaya.' },
+                    { q: 'Bagaimana skema pencairan dana hasil investasi?', a: 'Bagi hasil dan pengembalian pokok dibagikan ke Dompet Investor setiap bulannya. Anda bisa melakukan penarikan ke rekening bank setiap saat tanpa dikenakan biaya potongan jika ditarik ke bank nasional.' }
+                ],
+                initApp() { setTimeout(() => { if (window.lucide) lucide.createIcons(); }, 100); }
+            }
+        }
+        document.addEventListener('DOMContentLoaded', () => { AOS.init({ once: true, offset: 50, duration: 600 }); });
+    </script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+</body>
+
+</html>

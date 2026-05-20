@@ -1,0 +1,1 @@
+function petaApp() { return { sidebarOpen: false, initApp() { setTimeout(() => { if(window.lucide) lucide.createIcons(); }, 100); } } }

@@ -2,7 +2,7 @@
 
 KoneksiDesa adalah platform marketplace modern yang dirancang untuk menjembatani produk unggulan desa (pertanian, buah-buahan, dan kerajinan tangan) langsung ke konsumen. Platform ini mengintegrasikan teknologi **AI Rekomendasi**, **Peta UMKM Terintegrasi**, dan **Sistem Lacak Logistik** yang transparan.
 
-![KoneksiDesa Banner](https://images.unsplash.c   om/photo-1500382017468-9049fed747ef?w=1200&q=80)
+![KoneksiDesa Banner](https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1200&q=80)
 
 ---
 

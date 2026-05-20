@@ -1,0 +1,1 @@
+function riwApp() { return { sidebarOpen: false, initApp() { setTimeout(() => { if(window.lucide) lucide.createIcons(); }, 100); } } }

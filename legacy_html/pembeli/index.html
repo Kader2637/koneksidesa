@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="id" class="bg-slate-50">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Belanja Cerdas Dari Desa - E-Commerce</title>
+
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap"
+        rel="stylesheet">
+    <script src="js/tailwind-config.js"></script>
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        /* Custom Radio Button Styling */
+        .radio-custom:checked+div {
+            border-color: #10b981;
+            background-color: #ecfdf5;
+        }
+
+        .radio-custom:checked+div .radio-circle {
+            border-color: #10b981;
+            background-color: #10b981;
+            box-shadow: inset 0 0 0 3px white;
+        }
+    </style>
+</head>
+
+<body class="text-slate-800 font-sans antialiased overflow-y-scroll min-h-screen flex flex-col" x-data="indexApp()"
+    x-init="initApp()">
+
+    <header x-data="{ 
+    mobileSearch: false, 
+    profileOpen: false,
+    isActive(path) { 
+        return window.location.pathname.includes(path);
+    } 
+}" class="bg-white border-b border-slate-200 sticky top-0 z-50">
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-4">
+
+            <div class="flex items-center gap-2 shrink-0">
+                <a href="index.html" class="flex items-center gap-2 cursor-pointer group">
+                    <div
+                        class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-emerald-500 text-white flex items-center justify-center group-hover:bg-emerald-600 transition">
+                        <i data-lucide="shopping-bag" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+                    </div>
+                    <h1 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Koneksi<span
+                            class="text-emerald-500">Desa</span></h1>
+                </a>
+            </div>
+
+            <div class="flex-1 max-w-2xl hidden md:block">
+                <div class="w-full flex">
+                    <input type="text" placeholder="Cari hasil desa..."
+                        class="w-full border-2 border-emerald-500 rounded-l-xl pl-4 pr-4 py-2 text-sm outline-none focus:ring-4 focus:ring-emerald-500/10">
+                    <button class="bg-emerald-500 hover:bg-emerald-600 text-white px-5 rounded-r-xl transition">
+                        <i data-lucide="search" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2 sm:gap-5 shrink-0">
+                <button @click="mobileSearch = !mobileSearch" class="md:hidden p-2 text-slate-500">
+                    <i data-lucide="search" class="w-6 h-6"></i>
+                </button>
+
+                <a href="chat.html" class="relative p-2 text-slate-500 hover:text-emerald-600 transition">
+                    <i data-lucide="message-circle" class="w-6 h-6"></i>
+                    <span
+                        class="absolute top-1 right-1 w-4 h-4 bg-rose-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">3</span>
+                </a>
+
+                <a href="keranjang.html"
+                    class="flex items-center gap-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-3 sm:px-4 py-2 rounded-xl font-bold text-sm transition">
+                    <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+                    <span class="hidden sm:inline">Rp 45.000</span>
+                </a>
+
+                <div class="flex items-center justify-center cursor-pointer relative"
+                    @click="profileOpen = !profileOpen" @click.away="profileOpen = false">
+                    <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&q=80"
+                        class="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover border-2 border-emerald-100">
+
+                    <div x-show="profileOpen" x-transition x-cloak
+                        class="absolute top-full right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-200 py-2 z-50">
+                        <a href="profile.html"
+                            class="px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 flex items-center gap-2">
+                            <i data-lucide="user" class="w-4 h-4"></i> Profil Saya
+                        </a>
+                        <hr class="my-1 border-slate-100">
+                        <a href="../index.html"
+                            class="px-4 py-2 text-sm text-rose-600 hover:bg-rose-50 font-bold flex items-center gap-2">
+                            <i data-lucide="log-out" class="w-4 h-4"></i> Keluar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div x-show="mobileSearch" x-transition x-cloak class="md:hidden px-4 pb-4">
+            <div class="flex">
+                <input type="text" placeholder="Cari di KoneksiDesa..."
+                    class="w-full border-2 border-emerald-500 rounded-l-lg px-4 py-2 text-sm outline-none">
+                <button class="bg-emerald-500 text-white px-4 rounded-r-lg">
+                    <i data-lucide="search" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </div>
+
+        <div
+            class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-white border-t border-slate-50 overflow-x-auto hide-scrollbar">
+            <div class="flex gap-6 sm:gap-8 py-3 text-xs sm:text-sm whitespace-nowrap">
+
+                <a href="index.html"
+                    :class="(!isActive('rekomendasi.html') && !isActive('peta.html') && !isActive('lacak.html') && !isActive('ulasan.html')) ? 'text-emerald-600 font-bold border-b-2 border-emerald-600' : 'text-slate-500 font-medium hover:text-emerald-600'"
+                    class="transition-colors py-1">
+                    Beranda
+                </a>
+
+                <a href="rekomendasi.html"
+                    :class="isActive('rekomendasi.html') ? 'text-emerald-600 font-bold border-b-2 border-emerald-600' : 'text-slate-500 font-medium hover:text-emerald-600'"
+                    class="py-1 flex items-center gap-1">
+                    <i data-lucide="sparkles" class="w-3 h-3 sm:w-4 sm:h-4 text-amber-500"></i> AI Rekomendasi
+                </a>
+
+                <a href="peta.html"
+                    :class="isActive('peta.html') ? 'text-emerald-600 font-bold border-b-2 border-emerald-600' : 'text-slate-500 font-medium hover:text-emerald-600'"
+                    class="py-1">Peta UMKM</a>
+
+                <a href="lacak.html"
+                    :class="isActive('lacak.html') ? 'text-emerald-600 font-bold border-b-2 border-emerald-600' : 'text-slate-500 font-medium hover:text-emerald-600'"
+                    class="py-1">Lacak Logistik</a>
+
+                <a href="ulasan.html"
+                    :class="isActive('ulasan.html') ? 'text-emerald-600 font-bold border-b-2 border-emerald-600' : 'text-slate-500 font-medium hover:text-emerald-600'"
+                    class="py-1">Ulasan</a>
+            </div>
+        </div>
+    </header>
+    <main class="flex-1 flex flex-col py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full group-main">
+
+        <div x-show="!selectedProduct && !isCheckout" x-transition.opacity class="w-full">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
+                <div
+                    class="lg:col-span-2 bg-emerald-500 rounded-3xl p-8 relative overflow-hidden text-white min-h-[250px] shadow-lg flex flex-col justify-center">
+                    <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&q=80"
+                        class="absolute inset-0 w-full h-full object-cover opacity-20 mix-blend-overlay">
+                    <span
+                        class="bg-amber-500 text-white text-[10px] uppercase font-bold tracking-widest px-2 py-1 rounded w-max mb-3 relative z-10">Promo
+                        Melimpah</span>
+                    <h2 class="text-4xl font-black relative z-10 leading-tight mb-2">Pesta Panen Raya<br>Diskon Ongkir
+                        COD 100%!</h2>
+                    <p class="text-emerald-100 relative z-10 text-sm">Didukung logistik desa, sayur segar sampai rumah
+                        30 menit.</p>
+                </div>
+                <div
+                    class="bg-indigo-600 rounded-3xl p-6 relative overflow-hidden text-white flex flex-col justify-center shadow-lg group">
+                    <i data-lucide="boxes"
+                        class="absolute -right-4 -bottom-4 w-32 h-32 text-white/10 group-hover:scale-110 transition-transform"></i>
+                    <h3 class="text-xl font-black mb-1 relative z-10">Beli Skala Grosir?</h3>
+                    <p class="text-indigo-200 text-xs relative z-10 mb-4">Harga banting untuk partai besar B2B langsung
+                        dari gudang tani.</p>
+                    <button
+                        class="bg-white text-indigo-700 w-max px-4 py-2 text-xs font-bold rounded-lg mt-auto relative z-10 shadow-sm hover:scale-105 transition">Gabung
+                        B2B Mitra</button>
+                </div>
+            </div>
+
+            <h3 class="font-bold text-slate-800 text-lg mb-4">Jelajahi Kategori</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-8">
+                <div
+                    class="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 hover:border-emerald-500 hover:shadow-md transition cursor-pointer text-slate-600 hover:text-emerald-600">
+                    <i data-lucide="leaf" class="w-8 h-8"></i><span class="text-xs font-bold">Sayur Segar</span>
+                </div>
+                <div
+                    class="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 hover:border-amber-500 hover:shadow-md transition cursor-pointer text-slate-600 hover:text-amber-500">
+                    <i data-lucide="apple" class="w-8 h-8"></i><span class="text-xs font-bold">Buah-buahan</span>
+                </div>
+                <div
+                    class="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 hover:border-orange-500 hover:shadow-md transition cursor-pointer text-slate-600 hover:text-orange-500">
+                    <i data-lucide="wheat" class="w-8 h-8"></i><span class="text-xs font-bold">Beras & Palawija</span>
+                </div>
+                <div
+                    class="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 hover:border-rose-500 hover:shadow-md transition cursor-pointer text-slate-600 hover:text-rose-500">
+                    <i data-lucide="drumstick" class="w-8 h-8"></i><span class="text-xs font-bold">Daging Ternak</span>
+                </div>
+                <div
+                    class="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 hover:border-indigo-500 hover:shadow-md transition cursor-pointer text-slate-600 hover:text-indigo-500">
+                    <i data-lucide="scissors" class="w-8 h-8"></i><span class="text-xs font-bold">Kriya & Mebel</span>
+                </div>
+                <div
+                    class="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 hover:border-pink-500 hover:shadow-md transition cursor-pointer text-slate-600 hover:text-pink-500">
+                    <i data-lucide="cake" class="w-8 h-8"></i><span class="text-xs font-bold">Kue & Jajanan</span>
+                </div>
+            </div>
+
+            <h3 class="font-bold text-slate-800 text-lg mb-4">Rekomendasi Hari Ini</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                <template x-for="p in products" :key="p.id">
+                    <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden hover:shadow-xl transition group flex flex-col cursor-pointer"
+                        @click="bukaDetail(p)">
+                        <div class="h-48 bg-slate-100 relative overflow-hidden">
+                            <img :src="p.img"
+                                class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                            <div
+                                class="absolute top-2 left-2 bg-white/90 px-1.5 py-0.5 rounded text-[10px] font-bold text-emerald-600 flex items-center gap-1 backdrop-blur-sm">
+                                <i data-lucide="map-pin" class="w-3 h-3"></i> 2.1 km
+                            </div>
+                        </div>
+                        <div class="p-3 flex-1 flex flex-col">
+                            <p class="text-[10px] text-slate-400 font-bold uppercase mb-0.5" x-text="p.store"></p>
+                            <h4 class="text-sm font-bold text-slate-800 leading-tight mb-2 line-clamp-2"
+                                x-text="p.title"></h4>
+                            <div class="mt-auto">
+                                <h3 class="text-lg font-black text-rose-500 mb-2"
+                                    x-text="'Rp ' + p.price.toLocaleString('id-ID')"></h3>
+
+                                <div class="mt-3 flex gap-2" @click.stop>
+                                    <button @click="bukaCheckout(p)"
+                                        class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs py-2 rounded-lg transition shadow-sm">Beli</button>
+                                    <button
+                                        onclick="window.notif('Masuk Keranjang', 'Produk ditambahkan ke keranjang.', 'success')"
+                                        class="w-10 h-10 flex shrink-0 items-center justify-center bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-lg transition"><i
+                                            data-lucide="shopping-cart" class="w-4 h-4"></i></button>
+                                </div>
+
+                                <div
+                                    class="flex items-center gap-2 justify-between mt-3 pt-3 border-t border-slate-100">
+                                    <div class="flex items-center gap-1 text-amber-400 text-[10px] font-bold"><i
+                                            data-lucide="star" class="w-3 h-3 fill-amber-400"></i> <span
+                                            class="text-slate-500" x-text="p.rating"></span></div>
+                                    <span class="text-[10px] text-slate-400" x-text="'Terjual ' + p.sold"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <div x-show="selectedProduct && !isCheckout" x-cloak x-transition.opacity
+            class="w-full bg-white p-4 sm:p-8 rounded-3xl border border-slate-200 shadow-sm">
+            <button @click="kembaliKeBeranda()"
+                class="mb-6 flex items-center gap-2 text-slate-500 hover:text-emerald-600 font-medium transition group w-max">
+                <i data-lucide="arrow-left" class="w-5 h-5 group-hover:-translate-x-1 transition-transform"></i> Kembali
+                ke Beranda
+            </button>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12" x-if="selectedProduct">
+                <div>
+                    <div class="aspect-square rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 mb-4">
+                        <img :src="selectedProduct?.img" class="w-full h-full object-cover">
+                    </div>
+                </div>
+
+                <div class="flex flex-col">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span
+                            class="bg-emerald-100 text-emerald-700 text-[10px] px-2 py-1 rounded font-bold uppercase tracking-wider"
+                            x-text="selectedProduct?.store"></span>
+                        <span class="text-xs text-slate-500 flex items-center gap-1"><i data-lucide="map-pin"
+                                class="w-3 h-3"></i> 2.1 km dari Anda</span>
+                    </div>
+
+                    <h1 class="text-2xl sm:text-3xl font-black text-slate-900 mb-2 leading-tight"
+                        x-text="selectedProduct?.title"></h1>
+
+                    <div class="flex items-center gap-4 mb-4 text-sm border-b border-slate-100 pb-4">
+                        <div class="flex items-center gap-1 text-amber-500 font-bold"><i data-lucide="star"
+                                class="w-4 h-4 fill-amber-500"></i> <span x-text="selectedProduct?.rating"></span></div>
+                        <div class="w-1 h-1 bg-slate-300 rounded-full"></div>
+                        <div class="text-slate-600"><span class="font-bold text-slate-900"
+                                x-text="selectedProduct?.sold"></span> Terjual</div>
+                    </div>
+
+                    <h2 class="text-3xl font-black text-rose-500 mb-6"
+                        x-text="'Rp ' + (selectedProduct?.price || 0).toLocaleString('id-ID')"></h2>
+
+                    <div class="mb-8">
+                        <h3 class="font-bold text-slate-800 mb-2">Deskripsi Produk</h3>
+                        <p class="text-slate-600 text-sm leading-relaxed" x-text="selectedProduct?.description"></p>
+                    </div>
+
+                    <div class="flex gap-4 mt-auto">
+                        <button @click="bukaCheckout(selectedProduct)"
+                            class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-emerald-500/30 flex items-center justify-center gap-2">
+                            Beli Langsung
+                        </button>
+                        <button
+                            onclick="window.notif('Masuk Keranjang', 'Produk ditambahkan ke keranjang belanja.', 'success')"
+                            class="flex-1 border-2 border-emerald-500 text-emerald-600 hover:bg-emerald-50 font-bold py-3.5 rounded-xl transition flex items-center justify-center gap-2">
+                            <i data-lucide="shopping-cart" class="w-5 h-5"></i> + Keranjang
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-12 pt-8 border-t border-slate-200">
+                <h3 class="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
+                    <i data-lucide="message-square" class="w-5 h-5 text-emerald-500"></i> Ulasan Pembeli
+                </h3>
+                <div class="space-y-6">
+                    <div class="flex gap-4">
+                        <div
+                            class="w-10 h-10 rounded-full bg-slate-200 shrink-0 flex items-center justify-center font-bold text-slate-500">
+                            A</div>
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <h4 class="font-bold text-sm text-slate-800">Andi Saputra</h4><span
+                                    class="text-[10px] text-slate-400">1 hari yang lalu</span>
+                            </div>
+                            <div class="flex text-amber-400 mb-2"><i data-lucide="star"
+                                    class="w-3 h-3 fill-amber-400"></i><i data-lucide="star"
+                                    class="w-3 h-3 fill-amber-400"></i><i data-lucide="star"
+                                    class="w-3 h-3 fill-amber-400"></i><i data-lucide="star"
+                                    class="w-3 h-3 fill-amber-400"></i><i data-lucide="star"
+                                    class="w-3 h-3 fill-amber-400"></i></div>
+                            <p class="text-sm text-slate-600">Barangnya bagus banget, masih segar karena langsung dari
+                                petani desa sebelah. Ongkir COD juga gratis. Mantap!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div x-show="isCheckout" x-cloak x-transition.opacity class="w-full">
+            <button @click="batalCheckout()"
+                class="mb-6 flex items-center gap-2 text-slate-500 hover:text-emerald-600 font-medium transition group w-max">
+                <i data-lucide="arrow-left" class="w-5 h-5 group-hover:-translate-x-1 transition-transform"></i> Kembali
+            </button>
+            <h2 class="text-2xl font-black text-slate-900 mb-6">Pengiriman & Pembayaran</h2>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2 space-y-6">
+
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                        <h3 class="font-bold text-lg mb-4 flex items-center gap-2"><i data-lucide="map-pin"
+                                class="w-5 h-5 text-rose-500"></i> Alamat Pengiriman</h3>
+                        <div class="space-y-4">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 mb-1">Nama Penerima</label>
+                                    <input type="text" value="Budi Santoso"
+                                        class="w-full border border-slate-300 rounded-lg px-4 py-2.5 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 mb-1">Nomor Telepon /
+                                        WA</label>
+                                    <input type="text" value="081234567890"
+                                        class="w-full border border-slate-300 rounded-lg px-4 py-2.5 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-sm">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1">Alamat Lengkap</label>
+                                <textarea rows="3"
+                                    class="w-full border border-slate-300 rounded-lg px-4 py-2.5 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-sm">Jl. Mawar Merah No. 12, RT 03/RW 04, Desa Sukamaju, Kec. Bumiindah, Kab. Malang</textarea>
+                            </div>
+                            <button
+                                class="text-emerald-600 text-sm font-bold flex items-center gap-1 hover:text-emerald-700"><i
+                                    data-lucide="crosshair" class="w-4 h-4"></i> Pin Lokasi Peta</button>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                        <h3 class="font-bold text-lg mb-4 flex items-center gap-2"><i data-lucide="truck"
+                                class="w-5 h-5 text-blue-500"></i> Opsi Pengiriman</h3>
+                        <div class="space-y-3">
+                            <label class="relative cursor-pointer group">
+                                <input type="radio" name="shipping" class="peer sr-only radio-custom" checked>
+                                <div
+                                    class="border border-slate-200 rounded-xl p-4 flex items-center justify-between transition group-hover:border-emerald-500">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-5 h-5 rounded-full border-2 border-slate-300 radio-circle transition">
+                                        </div>
+                                        <div>
+                                            <p class="font-bold text-slate-800 text-sm">Kurir Desa (COD Lokal)</p>
+                                            <p class="text-xs text-slate-500">Estimasi tiba hari ini (2-3 jam)</p>
+                                        </div>
+                                    </div>
+                                    <span class="font-bold text-emerald-600 text-sm">Gratis</span>
+                                </div>
+                            </label>
+
+                            <label class="relative cursor-pointer group">
+                                <input type="radio" name="shipping" class="peer sr-only radio-custom">
+                                <div
+                                    class="border border-slate-200 rounded-xl p-4 flex items-center justify-between transition group-hover:border-emerald-500">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-5 h-5 rounded-full border-2 border-slate-300 radio-circle transition">
+                                        </div>
+                                        <div>
+                                            <p class="font-bold text-slate-800 text-sm">Reguler Antar Kota</p>
+                                            <p class="text-xs text-slate-500">Estimasi tiba besok (1 hari)</p>
+                                        </div>
+                                    </div>
+                                    <span class="font-bold text-slate-800 text-sm">Rp 10.000</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                        <h3 class="font-bold text-lg mb-4 flex items-center gap-2"><i data-lucide="wallet"
+                                class="w-5 h-5 text-amber-500"></i> Metode Pembayaran</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <label class="relative cursor-pointer group">
+                                <input type="radio" name="payment" class="peer sr-only radio-custom" checked>
+                                <div
+                                    class="border border-slate-200 rounded-xl p-4 flex items-center gap-3 transition group-hover:border-emerald-500">
+                                    <div class="w-5 h-5 rounded-full border-2 border-slate-300 radio-circle transition">
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <div
+                                            class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded text-[10px] font-black uppercase">
+                                            COD</div>
+                                        <span class="font-bold text-slate-800 text-sm">Bayar di Tempat</span>
+                                    </div>
+                                </div>
+                            </label>
+
+                            <label class="relative cursor-pointer group">
+                                <input type="radio" name="payment" class="peer sr-only radio-custom">
+                                <div
+                                    class="border border-slate-200 rounded-xl p-4 flex items-center gap-3 transition group-hover:border-emerald-500">
+                                    <div class="w-5 h-5 rounded-full border-2 border-slate-300 radio-circle transition">
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <i data-lucide="qr-code" class="w-5 h-5 text-blue-600"></i>
+                                        <span class="font-bold text-slate-800 text-sm">QRIS / E-Wallet</span>
+                                    </div>
+                                </div>
+                            </label>
+
+                            <label class="relative cursor-pointer group sm:col-span-2">
+                                <input type="radio" name="payment" class="peer sr-only radio-custom">
+                                <div
+                                    class="border border-slate-200 rounded-xl p-4 flex items-center gap-3 transition group-hover:border-emerald-500">
+                                    <div class="w-5 h-5 rounded-full border-2 border-slate-300 radio-circle transition">
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <i data-lucide="building-2" class="w-5 h-5 text-indigo-600"></i>
+                                        <span class="font-bold text-slate-800 text-sm">Transfer Bank Virtual
+                                            Account</span>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm sticky top-24">
+                        <h3 class="font-bold text-lg mb-4">Ringkasan Pesanan</h3>
+
+                        <div class="flex gap-3 pb-4 border-b border-slate-100 mb-4" x-if="selectedProduct">
+                            <img :src="selectedProduct?.img"
+                                class="w-16 h-16 rounded-lg object-cover bg-slate-100 shrink-0">
+                            <div class="flex-1 min-w-0">
+                                <h4 class="text-sm font-bold text-slate-800 line-clamp-2 leading-tight mb-1"
+                                    x-text="selectedProduct?.title"></h4>
+                                <div class="flex justify-between items-center mt-2">
+                                    <span class="text-xs text-slate-500">1 x</span>
+                                    <span class="text-sm font-bold text-rose-500"
+                                        x-text="'Rp ' + (selectedProduct?.price || 0).toLocaleString('id-ID')"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2 mb-4 text-sm">
+                            <div class="flex justify-between text-slate-600">
+                                <span>Subtotal Produk</span>
+                                <span class="font-medium"
+                                    x-text="'Rp ' + (selectedProduct?.price || 0).toLocaleString('id-ID')"></span>
+                            </div>
+                            <div class="flex justify-between text-slate-600">
+                                <span>Ongkos Kirim (COD)</span>
+                                <span class="font-medium text-emerald-600">Rp 0</span>
+                            </div>
+                            <div class="flex justify-between text-slate-600">
+                                <span>Biaya Layanan Aplikasi</span>
+                                <span class="font-medium">Rp 1.000</span>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-center py-4 border-t border-slate-100 mb-6">
+                            <span class="font-bold text-slate-800">Total Pembayaran</span>
+                            <span class="text-xl font-black text-rose-500"
+                                x-text="'Rp ' + ((selectedProduct?.price || 0) + 1000).toLocaleString('id-ID')"></span>
+                        </div>
+
+                        <button @click="buatPesananSelesai()"
+                            class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-emerald-500/30 flex items-center justify-center gap-2">
+                            Buat Pesanan Sekarang
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-slate-900 border-t border-slate-800 pt-16 pb-8 mt-12 text-slate-400">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
+
+                <div class="space-y-5">
+                    <a href="index.html" class="flex items-center gap-2 group cursor-pointer w-max">
+                        <div
+                            class="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center group-hover:bg-emerald-600 transition shadow-lg shadow-emerald-500/20">
+                            <i data-lucide="shopping-bag" class="w-5 h-5"></i>
+                        </div>
+                        <h1 class="text-2xl font-heading font-black text-white tracking-tight">Koneksi<span
+                                class="text-emerald-500">Desa</span></h1>
+                    </a>
+                    <p class="text-sm text-slate-500 leading-relaxed pr-4">
+                        Memberdayakan ekonomi desa melalui teknologi. Platform e-commerce yang menghubungkan langsung
+                        petani dan perajin UMKM ke tangan Anda.
+                    </p>
+                    <div class="flex items-center gap-3 pt-2">
+                        <a href="#"
+                            class="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 hover:bg-emerald-500 hover:border-emerald-500 hover:text-white flex items-center justify-center transition-all duration-300"
+                            title="Instagram"><i data-lucide="instagram" class="w-4 h-4"></i></a>
+                        <a href="#"
+                            class="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 hover:bg-emerald-500 hover:border-emerald-500 hover:text-white flex items-center justify-center transition-all duration-300"
+                            title="Facebook"><i data-lucide="facebook" class="w-4 h-4"></i></a>
+                        <a href="#"
+                            class="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 hover:bg-emerald-500 hover:border-emerald-500 hover:text-white flex items-center justify-center transition-all duration-300"
+                            title="YouTube"><i data-lucide="youtube" class="w-4 h-4"></i></a>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-white font-bold mb-5 uppercase text-sm tracking-wider">Eksplorasi</h3>
+                    <ul class="space-y-3 text-sm">
+                        <li><a href="index.html"
+                                class="hover:text-emerald-400 hover:translate-x-1 inline-block transition-all">Beranda
+                                Marketplace</a></li>
+                        <li><a href="peta.html"
+                                class="hover:text-emerald-400 hover:translate-x-1 inline-block transition-all">Peta UMKM
+                                COD</a></li>
+                        <li><a href="rekomendasi.html"
+                                class="hover:text-emerald-400 hover:translate-x-1 inline-block transition-all">AI
+                                Rekomendasi Fitur</a></li>
+                        <li><a href="lacak.html"
+                                class="hover:text-emerald-400 hover:translate-x-1 inline-block transition-all">Lacak
+                                Pesanan (Logistik)</a></li>
+                        <li><a href="ulasan.html"
+                                class="text-emerald-500 font-medium inline-block transition-all">Rating & Ulasan</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-white font-bold mb-5 uppercase text-sm tracking-wider">Bantuan Layanan</h3>
+                    <ul class="space-y-3 text-sm">
+                        <li><a href="#"
+                                class="hover:text-emerald-400 hover:translate-x-1 inline-block transition-all">Pusat
+                                Bantuan (FAQ)</a></li>
+                        <li><a href="#"
+                                class="hover:text-emerald-400 hover:translate-x-1 inline-block transition-all">Cara
+                                Menjadi Mitra UMKM</a></li>
+                        <li><a href="#"
+                                class="hover:text-emerald-400 hover:translate-x-1 inline-block transition-all">Syarat &
+                                Ketentuan</a></li>
+                        <li><a href="#"
+                                class="hover:text-emerald-400 hover:translate-x-1 inline-block transition-all">Kebijakan
+                                Privasi</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-white font-bold mb-5 uppercase text-sm tracking-wider">Hubungi Kami</h3>
+                    <ul class="space-y-4 text-sm mb-6 text-slate-400">
+                        <li class="flex items-start gap-3">
+                            <i data-lucide="map-pin" class="w-5 h-5 mt-0.5 shrink-0 text-emerald-500"></i>
+                            <span class="leading-relaxed">Jl. Raya Tlogomas No. 246, Kec. Lowokwaru, Kota Malang, Jawa
+                                Timur 65144</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i data-lucide="phone" class="w-4 h-4 shrink-0 text-emerald-500"></i>
+                            <span>(0341) 123-4567</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i data-lucide="mail" class="w-4 h-4 shrink-0 text-emerald-500"></i>
+                            <a href="mailto:halo@koneksidesa.com"
+                                class="hover:text-emerald-400 transition-colors">halo@koneksidesa.com</a>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <div class="border-t border-slate-800 pt-8 flex flex-col md:flex-row items-center justify-between gap-6">
+                <p class="text-sm text-slate-500 text-center md:text-left">
+                    Dibangun dengan <i data-lucide="heart"
+                        class="w-4 h-4 inline-block text-rose-500 fill-rose-500 animate-pulse mx-0.5 -translate-y-0.5"></i>
+                    oleh <span
+                        class="text-slate-300 font-bold hover:text-emerald-400 transition-colors cursor-pointer">KoneksiDesa</span>
+                    © 2026. Hak Cipta Dilindungi.
+                </p>
+
+                <div class="flex items-center gap-3">
+                    <span class="text-xs font-bold text-slate-600 mr-2">Dukungan Pembayaran:</span>
+                    <div
+                        class="px-3 py-1.5 bg-slate-800 rounded-lg text-xs font-black text-slate-300 border border-slate-700 cursor-default hover:border-emerald-500 transition-colors">
+                        QRIS</div>
+                    <div
+                        class="px-3 py-1.5 bg-slate-800 rounded-lg text-xs font-black text-slate-300 border border-slate-700 cursor-default hover:border-emerald-500 transition-colors">
+                        COD</div>
+                    <div
+                        class="px-3 py-1.5 bg-slate-800 rounded-lg text-xs font-black text-slate-300 border border-slate-700 cursor-default hover:border-emerald-500 transition-colors">
+                        BANK</div>
+                </div>
+            </div>
+
+        </div>
+    </footer>
+
+    <div x-data="{ toasts: [] }"
+        @show-toast.window="let id = Date.now(); toasts.push({id, ...$event.detail}); setTimeout(() => { toasts = toasts.filter(t => t.id !== id) }, 6000)"
+        class="fixed bottom-4 right-4 z-[999] flex flex-col gap-2 pointer-events-none">
+        <template x-for="t in toasts" :key="t.id">
+            <div x-show="true" x-transition.opacity.translate.y.50px
+                class="bg-white border-l-4 shadow-xl rounded-r-2xl p-4 w-72 sm:w-80 flex gap-3 pointer-events-auto transform transition-all hover:bg-slate-50 relative overflow-hidden group"
+                :class="t.type === 'error' ? 'border-rose-500' : 'border-emerald-500'">
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-bold text-slate-900 truncate pr-6" x-text="t.title"></p>
+                    <p class="text-xs text-slate-600 line-clamp-2 mt-0.5" x-text="t.text"></p>
+                </div>
+                <button @click="toasts = toasts.filter(x => x.id !== t.id)"
+                    class="text-slate-300 hover:text-rose-500 focus:outline-none transition absolute top-4 right-3 bg-white pl-2">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 6 6 18" />
+                        <path d="m6 6 12 12" />
+                    </svg>
+                </button>
+            </div>
+        </template>
+    </div>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('indexApp', () => ({
+                profileOpen: false,
+                selectedProduct: null,
+                isCheckout: false,
+
+                // Data Produk (Harga diubah jadi integer agar bisa dihitung subtotalnya)
+                products: [
+                    { id: 1, title: 'Bawang Merah Organik Nganjuk Kualitas Super', store: 'Kelompok Tani Harapan', price: 35000, img: 'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=500&q=80', sold: '1.2k', rating: '4.9', description: 'Bawang merah segar langsung panen dari ladang organik di Nganjuk. Bebas pestisida kimia berbahaya.' },
+                    { id: 2, title: 'Tomat Cherry Segar Petik Langsung', store: 'Kebun Pak Joyo', price: 15000, img: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=500&q=80', sold: '850', rating: '4.8', description: 'Tomat cherry manis dan segar, dipetik langsung saat Anda memesan.' },
+                    { id: 3, title: 'Beras Mentik Wangi Asli Delanggu 5kg', store: 'KUD Makmur', price: 75000, img: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=500&q=80', sold: '2.5k', rating: '5.0', description: 'Beras kualitas premium asli dari Delanggu. Pulen, wangi pandan alami.' },
+                    { id: 4, title: 'Kerajinan Anyaman Bambu Box Serbaguna', store: 'Kriya Desa Sentosa', price: 45000, img: 'https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?w=500&q=80', sold: '320', rating: '4.7', description: 'Kotak penyimpanan serbaguna dari anyaman bambu asli dikerjakan tangan.' },
+                    { id: 5, title: 'Ayam Kampung Utuh Bersih', store: 'Ternak Berkah', price: 65000, img: 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=500&q=80', sold: '540', rating: '4.9', description: 'Ayam kampung asli, dipotong secara higienis dan halal. Daging lebih manis.' }
+                ],
+
+                initApp() {
+                    setTimeout(() => { lucide.createIcons(); }, 100);
+                },
+
+                bukaDetail(p) {
+                    this.selectedProduct = p;
+                    this.isCheckout = false;
+                    setTimeout(() => { lucide.createIcons(); }, 50);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                },
+
+                bukaCheckout(p) {
+                    this.selectedProduct = p;
+                    this.isCheckout = true;
+                    setTimeout(() => { lucide.createIcons(); }, 50);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                },
+
+                batalCheckout() {
+                    this.isCheckout = false;
+                    setTimeout(() => { lucide.createIcons(); }, 50);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                },
+
+                kembaliKeBeranda() {
+                    this.selectedProduct = null;
+                    this.isCheckout = false;
+                    setTimeout(() => { lucide.createIcons(); }, 50);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                },
+
+                buatPesananSelesai() {
+                    window.notif('Pesanan Berhasil Dibuat!', 'Mitra UMKM akan segera memproses pesanan Anda.', 'success');
+                    setTimeout(() => {
+                        this.kembaliKeBeranda();
+                    }, 2000);
+                }
+            }))
+        });
+    </script>
+</body>
+
+</html>
