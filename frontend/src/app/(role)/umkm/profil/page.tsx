@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { User, ShieldCheck, Mail, Phone, MapPin, Store, Save, FileText } from "lucide-react";
+import { User, ShieldCheck, Mail, Phone, MapPin, Store, Save, Upload, Trash2 } from "lucide-react";
 import { toast } from "@/components/ui/Toast";
 
 export default function UMKMProfilPage() {
@@ -12,11 +12,14 @@ export default function UMKMProfilPage() {
     email: "",
     phone_number: "",
     address: "",
-    description: "",
-    logo_url: ""
+    description: ""
   });
   
   const [saving, setSaving] = useState(false);
+
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string>("");
+  const [deleteAvatar, setDeleteAvatar] = useState(false);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -27,79 +30,149 @@ export default function UMKMProfilPage() {
           business_name: u.business_name || u.name || "Toko UMKM Desa",
           owner_name: u.name || "Pemilik UMKM",
           email: u.email || "umkm@koneksidesa.com",
-          phone_number: u.phone_number || "081234567891",
-          address: u.address || "Dusun Karya Maju, Desa Agro Rejo",
-          description: u.description || "Produsen kerajinan tangan lokal berkualitas tinggi.",
-          logo_url: u.logo_url || "https://images.unsplash.com/photo-1627308595229-7830f5c92f4e?w=80&q=80"
+          phone_number: u.phone_number || "",
+          address: u.address || "",
+          description: u.description || "Produsen komoditas lokal desa berkualitas tinggi.",
         });
+        if (u.avatar) {
+          setAvatarPreview(u.avatar);
+        }
       } catch (e) {
         console.error(e);
       }
     }
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    setTimeout(() => {
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("Anda belum login!");
       setSaving(false);
-      const storedUser = localStorage.getItem("user");
-      if (storedUser) {
-        try {
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("name", profile.owner_name);
+    formData.append("phone_number", profile.phone_number);
+    formData.append("address", profile.address);
+    formData.append("business_name", profile.business_name);
+    formData.append("description", profile.description);
+    if (avatarFile) {
+      formData.append("avatar", avatarFile);
+    }
+    if (deleteAvatar) {
+      formData.append("delete_avatar", "true");
+    }
+
+    try {
+      const res = await fetch("http://localhost:8000/api/auth/profile/update", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        // Sync local storage
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
           const u = JSON.parse(storedUser);
-          const updated = {
-            ...u,
+          const updated = { 
+            ...u, 
             name: profile.owner_name,
             business_name: profile.business_name,
             phone_number: profile.phone_number,
             address: profile.address,
             description: profile.description,
-            logo_url: profile.logo_url
+            avatar: data.user.avatar 
           };
           localStorage.setItem("user", JSON.stringify(updated));
-        } catch (err) {
-          console.error(err);
         }
+        // Emit profile-updated event
+        window.dispatchEvent(new Event("profile-updated"));
+        toast.success("Profil Usaha UMKM berhasil diperbarui!");
+        setAvatarFile(null);
+        setDeleteAvatar(false);
+      } else {
+        const err = await res.json();
+        toast.error("Gagal memperbarui profil: " + (err.message || "kesalahan tidak diketahui"));
       }
-      toast.success("Profil Usaha UMKM berhasil diperbarui!");
-    }, 800);
+    } catch (err) {
+      console.error(err);
+      toast.error("Terjadi kesalahan saat menyimpan profil.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-6 pb-12"
+      className="space-y-6 pb-12 text-slate-800"
     >
       <div>
         <h1 className="text-2xl font-black tracking-tight text-slate-900 mb-1">Profil Usaha UMKM</h1>
-        <p className="text-slate-500 text-xs font-semibold">Kelola rincian informasi usaha, kontak operasional, serta logo identitas merek produk toko Anda.</p>
+        <p className="text-slate-500 text-xs font-semibold">Kelola rincian informasi usaha, kontak operasional, serta unggah logo identitas merek produk toko Anda.</p>
       </div>
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Logo Card */}
         <div className="md:col-span-1 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center text-center space-y-4 h-fit">
           <h3 className="font-heading font-black text-xs uppercase tracking-widest text-slate-400 self-start border-b border-slate-100 pb-2 w-full text-left">
-            Logo Usaha
+            Logo Usaha / Foto
           </h3>
           <div className="relative w-32 h-32 rounded-full overflow-hidden border border-slate-200 shadow-inner flex items-center justify-center bg-slate-50">
-            {profile.logo_url ? (
-              <img src={profile.logo_url} alt="Logo Usaha" className="w-full h-full object-cover" />
+            {avatarPreview ? (
+              <img src={avatarPreview} alt="Logo Usaha" className="w-full h-full object-cover" />
             ) : (
               <Store className="w-12 h-12 text-slate-350" />
             )}
           </div>
-          <div className="space-y-2 w-full">
-            <label className="text-xs text-slate-500 font-bold uppercase tracking-wider block text-left">Tautan URL Gambar Logo</label>
-            <input
-              type="text"
-              value={profile.logo_url}
-              onChange={(e) => setProfile({ ...profile, logo_url: e.target.value })}
-              placeholder="https://tautan-gambar-logo.png"
-              className="w-full bg-slate-55 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 outline-none focus:bg-white focus:border-emerald-500 transition"
-            />
+          
+          <div className="flex flex-col gap-2 w-full items-center">
+            <label className="w-full px-3 py-2 bg-slate-50 border border-slate-200 hover:bg-slate-100 rounded-xl text-xs font-black uppercase tracking-wider text-slate-650 transition cursor-pointer flex items-center justify-center gap-1.5 shadow-sm">
+              <Upload className="w-4 h-4 text-slate-600" />
+              Unggah Logo File
+              <input 
+                type="file" 
+                accept="image/jpeg,image/jpg,image/png" 
+                className="hidden" 
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    if (file.size > 2048 * 1024) {
+                      toast.error("Ukuran file maksimal adalah 2MB!");
+                      return;
+                    }
+                    setAvatarFile(file);
+                    setDeleteAvatar(false);
+                    setAvatarPreview(URL.createObjectURL(file));
+                  }
+                }}
+              />
+            </label>
+            {avatarPreview && (
+              <button
+                type="button"
+                onClick={() => {
+                  setAvatarFile(null);
+                  setDeleteAvatar(true);
+                  setAvatarPreview("");
+                }}
+                className="w-full px-3 py-2 bg-rose-50 hover:bg-rose-100 border border-rose-250 text-rose-650 text-xs font-black uppercase tracking-wider rounded-xl transition cursor-pointer flex items-center justify-center gap-1 border-none shadow-sm"
+              >
+                <Trash2 className="w-4 h-4" />
+                Hapus Logo
+              </button>
+            )}
           </div>
-          <p className="text-xs text-slate-400 leading-relaxed font-semibold">Gunakan URL gambar publik berukuran rasio 1:1 untuk penampilan optimal.</p>
+          <p className="text-[10px] text-slate-400 leading-relaxed font-semibold">Gunakan file gambar JPG, JPEG, atau PNG (Maks 2MB) dengan rasio 1:1.</p>
         </div>
 
         {/* Data Usaha & Kontak Form */}
@@ -139,9 +212,9 @@ export default function UMKMProfilPage() {
                 <input
                   type="email"
                   required
+                  disabled
                   value={profile.email}
-                  onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-                  className="w-full bg-slate-55 border border-slate-200 rounded-xl px-4 py-3 text-slate-800 outline-none focus:bg-white focus:border-emerald-500 transition font-semibold"
+                  className="w-full bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 text-slate-400 cursor-not-allowed outline-none font-semibold"
                 />
               </div>
 

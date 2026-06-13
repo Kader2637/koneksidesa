@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Landmark, Send, Wallet, HelpCircle, ShieldCheck } from "lucide-react";
 import { useInvestor } from "../layout";
 import { toast } from "@/components/ui/Toast";
+import Select2 from "@/components/ui/Select2";
 
 export default function InvestorPengajuanPage() {
   const {
@@ -114,17 +115,18 @@ export default function InvestorPengajuanPage() {
           <form onSubmit={triggerSubmit} className="space-y-4 text-xs font-bold text-slate-700">
             <div className="space-y-2 flex flex-col">
               <label className="tracking-wide text-xs text-slate-500">Pilih UMKM Target</label>
-              <select
-                required
+              <Select2
+                options={umkms.map((u) => ({
+                  value: u.id.toString(),
+                  label: u.business_name,
+                  sublabel: `Pemilik: ${u.owner}`
+                }))}
                 value={selectedUmkmId}
-                onChange={(e) => setSelectedUmkmId(e.target.value)}
-                className="w-full bg-slate-55 border border-slate-200 rounded-xl px-4 py-3 text-slate-800 outline-none focus:bg-white focus:border-indigo-500 transition font-extrabold cursor-pointer"
-              >
-                <option value="">-- Pilih UMKM --</option>
-                {umkms.map((u) => (
-                  <option key={u.id} value={u.id}>{u.business_name} (Pemilik: {u.owner})</option>
-                ))}
-              </select>
+                onChange={(val) => setSelectedUmkmId(val || "")}
+                placeholder="Pilih UMKM..."
+                isClearable={true}
+                isSearchable={true}
+              />
             </div>
 
             <div className="space-y-2 flex flex-col">
@@ -154,15 +156,17 @@ export default function InvestorPengajuanPage() {
 
               <div className="space-y-2 flex flex-col">
                 <label className="tracking-wide text-xs text-slate-500">Tenor Kontrak</label>
-                <select
+                <Select2
+                  options={[
+                    { value: "6 Bulan", label: "6 Bulan" },
+                    { value: "12 Bulan", label: "12 Bulan" },
+                    { value: "24 Bulan", label: "24 Bulan" }
+                  ]}
                   value={investTenor}
-                  onChange={(e) => setInvestTenor(e.target.value)}
-                  className="w-full bg-slate-55 border border-slate-200 rounded-xl px-4 py-3 text-slate-800 outline-none focus:bg-white focus:border-indigo-500 transition font-extrabold cursor-pointer"
-                >
-                  <option>6 Bulan</option>
-                  <option>12 Bulan</option>
-                  <option>24 Bulan</option>
-                </select>
+                  onChange={(val) => setInvestTenor(val || "12 Bulan")}
+                  isClearable={false}
+                  isSearchable={false}
+                />
               </div>
             </div>
 

@@ -30,7 +30,6 @@ import UMKMPendanaanPage from "./app/(role)/umkm/pendanaan/page";
 import DetailPendanaanUMKM from "./app/(role)/umkm/pendanaan/detail/page";
 import UMKMInvestorPage from "./app/(role)/umkm/investor/page";
 import UMKMLaporanPage from "./app/(role)/umkm/laporan/page";
-import LabaInvestorPage from "./app/(role)/umkm/laporan/laba_investor/page";
 import UMKMProfilPage from "./app/(role)/umkm/profil/page";
 
 // Investor
@@ -122,7 +121,7 @@ export default function App() {
             <Route path="pendanaan/:id" element={<DetailPendanaanUMKM />} />
             <Route path="investor" element={<UMKMInvestorPage />} />
             <Route path="laporan" element={<UMKMLaporanPage />} />
-            <Route path="laba_investor" element={<LabaInvestorPage />} />
+            <Route path="laba_investor" element={<Navigate to="/umkm/laporan" replace />} />
             <Route path="profil" element={<UMKMProfilPage />} />
           </Route>
         </Route>

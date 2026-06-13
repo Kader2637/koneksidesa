@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { User, Save, Settings, ShieldCheck } from "lucide-react";
+import { User, Save, Settings, ShieldCheck, Upload, Trash2 } from "lucide-react";
 import { toast } from "@/components/ui/Toast";
 
 export default function PembeliProfilPage() {
@@ -15,6 +15,10 @@ export default function PembeliProfilPage() {
 
   const [saving, setSaving] = useState(false);
 
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string>("");
+  const [deleteAvatar, setDeleteAvatar] = useState(false);
+
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
@@ -23,48 +27,88 @@ export default function PembeliProfilPage() {
         setProfile({
           name: u.name || "Budi Santoso",
           email: u.email || "budi@koneksidesa.com",
-          phone_number: u.phone_number || "081234567890",
-          address: u.address || "Jl. Makmur No. 12, RT 02/05, Desa Agro Rejo",
+          phone_number: u.phone_number || "",
+          address: u.address || "",
         });
+        if (u.avatar) {
+          setAvatarPreview(u.avatar);
+        }
       } catch (e) {
         console.error(e);
       }
     }
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    setTimeout(() => {
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("Anda belum login!");
       setSaving(false);
-      const storedUser = localStorage.getItem("user");
-      if (storedUser) {
-        try {
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("name", profile.name);
+    formData.append("phone_number", profile.phone_number);
+    formData.append("address", profile.address);
+    if (avatarFile) {
+      formData.append("avatar", avatarFile);
+    }
+    if (deleteAvatar) {
+      formData.append("delete_avatar", "true");
+    }
+
+    try {
+      const res = await fetch("http://localhost:8000/api/auth/profile/update", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        // Sync local storage
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
           const u = JSON.parse(storedUser);
-          const updated = {
-            ...u,
-            name: profile.name,
-            phone_number: profile.phone_number,
-            address: profile.address,
-          };
+          const updated = { ...u, ...profile, avatar: data.user.avatar };
           localStorage.setItem("user", JSON.stringify(updated));
-        } catch (err) {
-          console.error(err);
         }
+        // Emit profile-updated event
+        window.dispatchEvent(new Event("profile-updated"));
+        toast.success("Profil berhasil diperbarui!");
+        setAvatarFile(null);
+        setDeleteAvatar(false);
+      } else {
+        const err = await res.json();
+        toast.error("Gagal memperbarui profil: " + (err.message || "kesalahan tidak diketahui"));
       }
-      toast.success("Profil dan Alamat Pengiriman berhasil diperbarui!");
-    }, 800);
+    } catch (err) {
+      console.error(err);
+      toast.error("Terjadi kesalahan saat menyimpan profil.");
+    } finally {
+      setSaving(false);
+    }
   };
+
+  const userInitials = profile.name
+    ? profile.name.split(" ").map(n => n.charAt(0)).join("").substring(0, 2).toUpperCase()
+    : "PB";
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-6 pb-12"
+      className="space-y-6 pb-12 text-slate-800"
     >
       <div>
         <h1 className="text-2xl font-black tracking-tight text-slate-900 mb-1">Profil & Alamat</h1>
-        <p className="text-slate-500 text-xs font-semibold">Kelola rincian informasi akun, nomor kontak aktif, dan alamat utama untuk pengiriman belanja produk desa.</p>
+        <p className="text-slate-500 text-xs font-semibold">Kelola rincian informasi akun, foto profil, dan alamat utama untuk pengiriman belanja produk desa.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -74,7 +118,13 @@ export default function PembeliProfilPage() {
             Status Akun
           </h3>
           <div className="relative w-24 h-24 rounded-full overflow-hidden border border-slate-200 shadow-inner flex items-center justify-center bg-indigo-50/50">
-            <User className="w-10 h-10 text-indigo-500" />
+            {avatarPreview ? (
+              <img src={avatarPreview} alt={profile.name} className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-indigo-550 to-indigo-700 flex items-center justify-center text-white font-bold text-xl">
+                {userInitials}
+              </div>
+            )}
           </div>
           <div>
             <h4 className="font-extrabold text-sm text-slate-800">{profile.name}</h4>
@@ -92,10 +142,64 @@ export default function PembeliProfilPage() {
             <Settings className="w-4 h-4 text-indigo-500" /> Pengaturan Informasi Pribadi
           </h3>
 
-          <form onSubmit={handleSubmit} className="space-y-4 text-xs font-bold text-slate-500">
+          <form onSubmit={handleSubmit} className="space-y-4 text-xs font-bold text-slate-650">
+            {/* Avatar Upload UI */}
+            <div className="flex items-center gap-5 pb-4 border-b border-slate-100/85">
+              <div className="relative w-16 h-16 rounded-full overflow-hidden bg-slate-100 border border-slate-200 flex-shrink-0 flex items-center justify-center">
+                {avatarPreview ? (
+                  <img src={avatarPreview} alt="Preview Avatar" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
+                    {userInitials}
+                  </div>
+                )}
+              </div>
+              <div className="space-y-1.5">
+                <span className="text-[10px] font-black uppercase tracking-wider text-slate-450 block">Foto Profil</span>
+                <div className="flex gap-2 items-center">
+                  <label className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-[10px] font-black uppercase tracking-wider text-slate-650 hover:bg-slate-100 transition cursor-pointer flex items-center gap-1.5">
+                    <Upload className="w-3.5 h-3.5" />
+                    Unggah Foto
+                    <input 
+                      type="file" 
+                      accept="image/jpeg,image/jpg,image/png" 
+                      className="hidden" 
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          if (file.size > 2048 * 1024) {
+                            toast.error("Ukuran file maksimal adalah 2MB!");
+                            return;
+                          }
+                          setAvatarFile(file);
+                          setDeleteAvatar(false);
+                          setAvatarPreview(URL.createObjectURL(file));
+                        }
+                      }}
+                    />
+                  </label>
+                  {avatarPreview && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAvatarFile(null);
+                        setDeleteAvatar(true);
+                        setAvatarPreview("");
+                      }}
+                      className="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-250 text-rose-650 text-[10px] font-black uppercase tracking-wider rounded-lg transition cursor-pointer flex items-center gap-1 border-none"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      Hapus
+                    </button>
+                  )}
+                </div>
+                <span className="text-[9px] text-slate-400 block font-semibold">Maksimal 2MB (JPG, JPEG, PNG).</span>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2 flex flex-col">
-                <label className="tracking-wide">Nama Lengkap</label>
+                <label className="tracking-wide text-slate-500">Nama Lengkap</label>
                 <input
                   type="text"
                   required
@@ -106,7 +210,7 @@ export default function PembeliProfilPage() {
               </div>
 
               <div className="space-y-2 flex flex-col">
-                <label className="tracking-wide">Alamat Email</label>
+                <label className="tracking-wide text-slate-500">Alamat Email</label>
                 <input
                   type="email"
                   disabled
@@ -117,23 +221,23 @@ export default function PembeliProfilPage() {
             </div>
 
             <div className="space-y-2 flex flex-col">
-              <label className="tracking-wide">Nomor Telepon / WhatsApp</label>
+              <label className="tracking-wide text-slate-500">Nomor Telepon / WhatsApp</label>
               <input
                 type="text"
                 required
                 value={profile.phone_number}
                 onChange={(e) => setProfile({ ...profile, phone_number: e.target.value })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-800 outline-none focus:bg-white focus:border-indigo-500/50 transition font-semibold"
+                className="w-full bg-slate-55 border border-slate-200 rounded-xl px-4 py-3 text-slate-800 outline-none focus:bg-white focus:border-indigo-500/50 transition font-semibold"
               />
             </div>
 
             <div className="space-y-2 flex flex-col">
-              <label className="tracking-wide">Alamat Lengkap Pengiriman</label>
+              <label className="tracking-wide text-slate-500">Alamat Lengkap Pengiriman</label>
               <textarea
                 required
                 value={profile.address}
                 onChange={(e) => setProfile({ ...profile, address: e.target.value })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-slate-800 outline-none focus:bg-white focus:border-indigo-500/50 transition font-medium resize-none"
+                className="w-full bg-slate-55 border border-slate-200 rounded-xl p-4 text-slate-800 outline-none focus:bg-white focus:border-indigo-500/50 transition font-medium resize-none"
                 rows={3}
               />
             </div>

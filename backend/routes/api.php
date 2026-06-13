@@ -25,6 +25,10 @@ Route::get('/products/{productId}/reviews', [MarketplaceController::class, 'getP
 Route::post('/midtrans/webhook', [MarketplaceController::class, 'webhook']);
 Route::get('/public-stats', [MarketplaceController::class, 'publicStats']);
 
+
+
+
+
 /*
 |--------------------------------------------------------------------------
 | Authenticated Routes
@@ -34,7 +38,9 @@ Route::middleware('auth:sanctum')->group(function () {
     
     // Auth profile & logout
     Route::get('/auth/profile', [AuthController::class, 'profile']);
+    Route::post('/auth/profile/update', [AuthController::class, 'updateProfile']);
     Route::post('/auth/logout', [AuthController::class, 'logout']);
+    Route::get('/search', [MarketplaceController::class, 'search']);
 
     // Notifications
     Route::get('/notifications', function (\Illuminate\Http\Request $request) {
@@ -62,6 +68,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/orders', [MarketplaceController::class, 'checkout']);
         Route::get('/orders', [MarketplaceController::class, 'getOrders']);
         Route::get('/orders/{id}/check-status', [MarketplaceController::class, 'checkStatus']);
+        Route::put('/orders/{id}/complete', [MarketplaceController::class, 'completeOrder']);
         Route::post('/payments/upload', [MarketplaceController::class, 'uploadManualProof']);
         Route::post('/products/{productId}/reviews', [MarketplaceController::class, 'addReview']);
     });
@@ -77,6 +84,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/umkm/products/{id}', [MarketplaceController::class, 'deleteProduct']);
         
         Route::get('/umkm/orders', [MarketplaceController::class, 'getOrders']);
+        Route::get('/umkm/finance-stats', [MarketplaceController::class, 'getUmkmFinanceStats']);
         Route::put('/umkm/orders/{id}/status', [MarketplaceController::class, 'advanceOrderStatus']);
         
         Route::get('/umkm/loans', [AdminController::class, 'getUmkmLoans']);
@@ -88,6 +96,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/umkm/pendanaan', [InvestorController::class, 'umkmPendanaans']);
         Route::get('/umkm/investasi', [InvestorController::class, 'umkmInvestasis']);
         Route::post('/umkm/investasi/{id}/resolve', [InvestorController::class, 'resolveInvestasi']);
+        Route::post('/umkm/roi-payment/{id}/pay', [InvestorController::class, 'payRoiManual']);
     });
 
     // ----------------------------------------------------

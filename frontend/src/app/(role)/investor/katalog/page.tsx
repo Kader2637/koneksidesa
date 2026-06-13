@@ -14,7 +14,7 @@ export default function KatalogPage() {
   const [selectedCamp, setSelectedCamp] = useState<any | null>(null);
   const [investAmt, setInvestAmt] = useState("");
 
-  const handleInvestSubmit = (e: React.FormEvent) => {
+  const handleInvestSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedCamp) return;
 
@@ -29,7 +29,7 @@ export default function KatalogPage() {
       return;
     }
 
-    const success = investInCampaign(selectedCamp.id, amt);
+    const success = await investInCampaign(selectedCamp.id, amt);
     if (success) {
       toast.success(`Sukses menyalurkan investasi sebesar Rp ${amt.toLocaleString("id-ID")} untuk proyek: ${selectedCamp.title}!`);
       setSelectedCamp(null);

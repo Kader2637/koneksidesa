@@ -9,7 +9,7 @@ import { toast } from "@/components/ui/Toast";
 
 export default function PembeliProdukPage() {
   const navigate = useNavigate();
-  const { cart, addToCart, updateQty } = usePembeli();
+  const { cart, addToCart, updateQty, checkout } = usePembeli();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   
@@ -19,11 +19,47 @@ export default function PembeliProdukPage() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   const handleBeli = async (prod: Product) => {
-    const alreadyInCart = cart.some(item => item.id === prod.id);
-    if (!alreadyInCart) {
-      await addToCart(prod);
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("Silakan login terlebih dahulu untuk melakukan pembelian.");
+      navigate("/login");
+      return;
     }
-    navigate("/pembeli/keranjang");
+
+    try {
+      // 1. Add to cart
+      const resAdd = await fetch("http://localhost:8000/api/carts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify({ product_id: prod.id, quantity: 1 })
+      });
+
+      if (!resAdd.ok) {
+        toast.error("Gagal menambahkan barang ke keranjang.");
+        return;
+      }
+
+      // 2. Perform checkout immediately
+      const result = await checkout("midtrans");
+      if (result && result.order_id) {
+        toast.success("Pesanan berhasil dibuat!");
+        
+        // 3. Navigate straight to order details page with state parameters
+        navigate("/pembeli/pesanan", { 
+          state: { 
+            orderId: result.order_id, 
+            snapToken: result.snap_token,
+            rawId: result.raw_id,
+            triggerPayment: true 
+          } 
+        });
+      } else {
+        toast.error("Gagal memproses checkout digital.");
+      }
+    } catch (err) {
+      console.error("Quick buy error:", err);
+      toast.error("Terjadi kesalahan saat memproses pembelian.");
+    }
   };
 
   const renderProductActions = (prod: Product) => {

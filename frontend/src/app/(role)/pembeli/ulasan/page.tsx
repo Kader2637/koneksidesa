@@ -2,7 +2,10 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Star, AlertCircle, CheckCircle } from "lucide-react";
+import { useLocation } from "react-router-dom";
 import { usePembeli } from "../layout";
+import Select2 from "@/components/ui/Select2";
+
 
 interface Product {
   id: number;
@@ -25,6 +28,7 @@ interface ReviewItem {
 
 export default function UlasanPage() {
   const { reviewsList, submitReview } = usePembeli();
+  const location = useLocation();
 
   // States
   const [products, setProducts] = useState<Product[]>([]);
@@ -57,6 +61,19 @@ export default function UlasanPage() {
             category: item.category
           }));
           setProducts(mapped);
+
+          // Check if there is a query param
+          const searchParams = new URLSearchParams(location.search);
+          const productIdParam = searchParams.get("product_id");
+          if (productIdParam) {
+            const parsedId = Number(productIdParam);
+            const exists = mapped.some((p: any) => p.id === parsedId);
+            if (exists) {
+              setSelectedProductId(parsedId);
+              return;
+            }
+          }
+
           if (mapped.length > 0) {
             setSelectedProductId(mapped[0].id);
           }
@@ -68,7 +85,8 @@ export default function UlasanPage() {
       }
     };
     fetchProducts();
-  }, []);
+  }, [location.search]);
+
 
   // Fetch reviews when selected product changes
   const fetchReviews = async (productId: number) => {
@@ -219,18 +237,18 @@ export default function UlasanPage() {
               {loadingProducts ? (
                 <div className="text-slate-400 py-2 animate-pulse">Memuat produk...</div>
               ) : (
-                <select
+                <Select2
+                  options={products.map((prod) => ({
+                    value: prod.id,
+                    label: prod.name,
+                    sublabel: prod.desa,
+                  }))}
                   value={selectedProductId}
-                  onChange={(e) => setSelectedProductId(e.target.value ? Number(e.target.value) : "")}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-800 outline-none focus:bg-white focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/5 transition-all duration-300 font-extrabold cursor-pointer"
-                >
-                  <option value="">-- Pilih Produk --</option>
-                  {products.map((prod) => (
-                    <option key={prod.id} value={prod.id}>
-                      {prod.name} ({prod.desa})
-                    </option>
-                  ))}
-                </select>
+                  onChange={(val) => setSelectedProductId(val ? Number(val) : "")}
+                  placeholder="-- Pilih Produk --"
+                  isSearchable={true}
+                  isClearable={true}
+                />
               )}
             </div>
 

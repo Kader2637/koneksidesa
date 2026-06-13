@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { useInvestor } from "../../layout";
 import { toast } from "@/components/ui/Toast";
+import Select2 from "@/components/ui/Select2";
 
 interface Product {
   id: number;
@@ -304,17 +305,18 @@ export default function InvestorUMKMDetailPage() {
             {/* Tenor input */}
             <div className="space-y-1.5">
               <label htmlFor="tenor" className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">Tenor Pembiayaan</label>
-              <select
-                id="tenor"
+              <Select2
+                options={[
+                  { value: "3 Bulan", label: "3 Bulan" },
+                  { value: "6 Bulan", label: "6 Bulan" },
+                  { value: "12 Bulan", label: "12 Bulan" },
+                  { value: "24 Bulan", label: "24 Bulan" }
+                ]}
                 value={investTenor}
-                onChange={(e) => setInvestTenor(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200/80 rounded-xl py-2.5 px-3 text-slate-800 outline-none focus:border-amber-400 focus:bg-white shadow-sm"
-              >
-                <option value="3 Bulan">3 Bulan</option>
-                <option value="6 Bulan">6 Bulan</option>
-                <option value="12 Bulan">12 Bulan</option>
-                <option value="24 Bulan">24 Bulan</option>
-              </select>
+                onChange={(val) => setInvestTenor(val || "6 Bulan")}
+                isClearable={false}
+                isSearchable={false}
+              />
             </div>
 
             {/* Message input */}

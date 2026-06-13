@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useMemo, useEffect } from "
 import { useLocation, Link, Outlet, useNavigate } from "react-router-dom";
 import Image from "../../../components/ui/Image";
 import NotificationBell from "../../../components/ui/NotificationBell";
+import GlobalSearch from "../../../components/ui/GlobalSearch";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ShoppingBag, ShoppingCart, Truck, Sparkles,
@@ -19,6 +20,8 @@ export interface Product {
   rating: number;
   category: string;
   description?: string;
+  stock?: number;
+  seller_id?: number;
 }
 
 export interface CartItem extends Product {
@@ -93,17 +96,23 @@ export default function PembeliLayout() {
 
   // State
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [user, setUser] = useState<{ name: string; role: string; email: string } | null>(null);
+  const [user, setUser] = useState<{ name: string; role: string; email: string; avatar?: string } | null>(null);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (e) {
-        console.error("Parse user error:", e);
+    const loadUser = () => {
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        try {
+          setUser(JSON.parse(storedUser));
+        } catch (e) {
+          console.error("Parse user error:", e);
+        }
       }
-    }
+    };
+    loadUser();
+    window.addEventListener("profile-updated", loadUser);
+    return () => window.removeEventListener("profile-updated", loadUser);
   }, []);
 
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -304,9 +313,17 @@ export default function PembeliLayout() {
       {/* User Profile */}
       <div className="px-4 py-4 mx-4 mt-4 rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold text-sm shadow-sm">
-            {userInitials}
-          </div>
+          {user?.avatar ? (
+            <img
+              src={user.avatar}
+              alt={user.name}
+              className="w-9 h-9 rounded-xl object-cover shadow-sm border border-emerald-250"
+            />
+          ) : (
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold text-sm shadow-sm">
+              {userInitials}
+            </div>
+          )}
           <div className="min-w-0">
             <p className="text-xs font-bold text-slate-800 truncate">{user?.name || "Budi Santoso"}</p>
             <p className="text-[10px] text-emerald-600 font-semibold truncate">{user?.email || "Konsumen Setia"}</p>
@@ -431,13 +448,12 @@ export default function PembeliLayout() {
             <div className="flex-1" />
 
             {/* Search */}
-            <div className="hidden md:flex items-center gap-2 bg-slate-100 border border-slate-200 focus-within:border-emerald-400 focus-within:bg-white px-3 py-1.5 rounded-lg transition-all duration-200 w-52">
+            <div 
+              onClick={() => setIsSearchOpen(true)}
+              className="hidden md:flex items-center gap-2 bg-slate-100 border border-slate-200 cursor-pointer hover:border-emerald-400/50 px-3 py-1.5 rounded-lg transition-all duration-200 w-52"
+            >
               <Search className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
-              <input
-                type="text"
-                placeholder="Cari produk desa..."
-                className="bg-transparent border-none outline-none text-xs text-slate-800 placeholder:text-slate-400 w-full"
-              />
+              <span className="text-xs text-slate-400 font-semibold select-none">Cari produk desa...</span>
             </div>
 
             {/* Cart Badge */}
@@ -458,9 +474,17 @@ export default function PembeliLayout() {
 
             {/* User Avatar */}
             <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold text-xs shadow-sm">
-                {userInitials}
-              </div>
+              {user?.avatar ? (
+                <img
+                  src={user.avatar}
+                  alt={user.name}
+                  className="w-7 h-7 rounded-lg object-cover shadow-sm border border-slate-250"
+                />
+              ) : (
+                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold text-xs shadow-sm">
+                  {userInitials}
+                </div>
+              )}
               <div className="hidden sm:block">
                 <p className="text-xs font-semibold text-slate-800 leading-none">{user?.name || "Budi Santoso"}</p>
                 <p className="text-[10px] text-slate-400 mt-0.5">Pembeli</p>
@@ -482,6 +506,11 @@ export default function PembeliLayout() {
           </main>
         </div>
       </div>
+      <AnimatePresence>
+        {isSearchOpen && (
+          <GlobalSearch onClose={() => setIsSearchOpen(false)} />
+        )}
+      </AnimatePresence>
     </PembeliContext.Provider>
   );
 }

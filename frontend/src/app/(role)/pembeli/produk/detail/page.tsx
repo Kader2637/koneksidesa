@@ -22,7 +22,7 @@ interface StoreDetail {
 export default function PembeliProdukDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { cart, addToCart, updateQty } = usePembeli();
+  const { cart, addToCart, updateQty, checkout } = usePembeli();
 
   const [product, setProduct] = useState<any | null>(null);
   const [otherProducts, setOtherProducts] = useState<Product[]>([]);
@@ -106,13 +106,49 @@ export default function PembeliProdukDetailPage() {
     setQuantity(1);
   };
 
-  const handleBuyNow = () => {
+  const handleBuyNow = async () => {
     if (!product) return;
-    const alreadyInCart = cart.some(item => item.id === product.id);
-    if (!alreadyInCart) {
-      addToCart(product);
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("Silakan login terlebih dahulu untuk melakukan pembelian.");
+      navigate("/login");
+      return;
     }
-    navigate("/pembeli/keranjang");
+
+    try {
+      // 1. Add to cart
+      const resAdd = await fetch("http://localhost:8000/api/carts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify({ product_id: product.id, quantity: 1 })
+      });
+
+      if (!resAdd.ok) {
+        toast.error("Gagal menambahkan barang ke keranjang.");
+        return;
+      }
+
+      // 2. Perform checkout immediately
+      const result = await checkout("midtrans");
+      if (result && result.order_id) {
+        toast.success("Pesanan berhasil dibuat!");
+        
+        // 3. Navigate straight to order details page with state parameters
+        navigate("/pembeli/pesanan", { 
+          state: { 
+            orderId: result.order_id, 
+            snapToken: result.snap_token,
+            rawId: result.raw_id,
+            triggerPayment: true 
+          } 
+        });
+      } else {
+        toast.error("Gagal memproses checkout digital.");
+      }
+    } catch (err) {
+      console.error("Quick buy error:", err);
+      toast.error("Terjadi kesalahan saat memproses pembelian.");
+    }
   };
 
   if (loading) {

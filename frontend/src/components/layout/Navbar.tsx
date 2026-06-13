@@ -209,7 +209,7 @@ export default function Navbar() {
                   onClick={() => setShowLoginModal(true)}
                   className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-all duration-200 shadow-sm shadow-emerald-600/20"
                 >
-                  Masuk Portal
+                  Login
                   <Sparkles className="w-4 h-4 text-amber-300" />
                 </button>
               )}
@@ -328,7 +328,7 @@ export default function Navbar() {
                     onClick={() => { setIsOpen(false); setShowLoginModal(true); }}
                     className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl flex items-center justify-center gap-2"
                   >
-                    Masuk Portal
+                    Login
                     <Sparkles className="w-4 h-4 text-amber-300" />
                   </button>
                 )}

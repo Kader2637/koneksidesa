@@ -342,6 +342,7 @@ class MarketplaceController extends Controller
             return [
                 'id' => 'ORD-' . date('Y') . '-' . str_pad($item->id, 5, '0', STR_PAD_LEFT),
                 'raw_id' => $item->id,
+                'product_id' => count($summaryParts) > 0 ? $items[0]->product_id : null,
                 'buyer' => $item->user->name ?? 'Pembeli',
                 'product' => count($summaryParts) > 0 ? $items[0]->product->name ?? 'Produk' : 'Produk',
                 'qty' => count($summaryParts) > 0 ? $items[0]->quantity : 0,
@@ -355,11 +356,21 @@ class MarketplaceController extends Controller
                 },
                 'snap_token' => $snapToken,
                 'snap_url' => $snapUrl,
-                'midtrans_order_id' => $midtransOrderId
+                'midtrans_order_id' => $midtransOrderId,
+                'items' => $items->map(function ($ot) {
+                    return [
+                        'product_id' => $ot->product_id,
+                        'name' => $ot->product->name ?? 'Produk',
+                        'quantity' => $ot->quantity,
+                        'price' => (int)$ot->price_at_sale,
+                        'image' => $ot->product->image ?? ''
+                    ];
+                })->toArray(),
             ];
         });
 
         return response()->json($formatted);
+
     }
 
     public function checkout(Request $request)
@@ -560,8 +571,6 @@ class MarketplaceController extends Controller
         if ($currentStatus === 'pending') {
             $newStatus = 'success';
         } elseif ($currentStatus === 'success') {
-            $newStatus = 'shipped';
-        } elseif ($currentStatus === 'shipped') {
             $newStatus = 'completed';
         }
 
@@ -573,10 +582,41 @@ class MarketplaceController extends Controller
             "Status Pesanan Diperbarui 📦",
             "Pesanan Anda #ORD-" . date('Y') . "-" . str_pad($order->id, 5, '0', STR_PAD_LEFT) . " kini berstatus: " . $this->formatStatus($newStatus),
             "order",
-            "/pembeli/lacak"
+            "/pembeli/pesanan"
         );
 
         return response()->json(['message' => 'Order status advanced.', 'status' => $this->formatStatus($newStatus)]);
+    }
+
+    public function getUmkmFinanceStats(Request $request)
+    {
+        $user = $request->user();
+
+        // 1. Wallet balance
+        $walletBalance = (int) $user->wallet_balance;
+
+        // 2. Total Investor Funds (Active or Diterima investments)
+        $totalInvestorFunds = (int) \App\Models\Investment::where('umkm_id', $user->id)
+            ->whereIn('status', ['Aktif', 'Diterima'])
+            ->sum('amount');
+
+        // 3. Total Sales Revenue (from orders associated with this UMKM)
+        $productIds = Product::where('seller_id', $user->id)->pluck('id');
+        $totalSalesRevenue = (int) Order::whereHas('orderItems', function ($q) use ($productIds) {
+                $q->whereIn('product_id', $productIds);
+            })
+            ->where('status', '!=', 'cancelled')
+            ->sum('total_price');
+
+        // 4. Combined capital
+        $totalCombined = $totalInvestorFunds + $totalSalesRevenue;
+
+        return response()->json([
+            'wallet_balance' => $walletBalance,
+            'total_investor_funds' => $totalInvestorFunds,
+            'total_sales_revenue' => $totalSalesRevenue,
+            'total_combined' => $totalCombined
+        ]);
     }
 
     public function checkStatus($id)
@@ -659,6 +699,52 @@ class MarketplaceController extends Controller
             ]);
         }
     }
+
+    public function completeOrder(Request $request, $id)
+    {
+        $order = Order::findOrFail($id);
+
+        if ($order->user_id !== $request->user()->id && $request->user()->role !== 'Admin') {
+            return response()->json(['message' => 'Unauthorized.'], 403);
+        }
+
+        $order->update(['status' => 'completed']);
+
+        // Send notification to buyer
+        Notification::send(
+            $order->user_id,
+            "Pesanan Selesai 🎉",
+            "Terima kasih! Pesanan Anda #ORD-" . date('Y') . "-" . str_pad($order->id, 5, '0', STR_PAD_LEFT) . " telah dinyatakan selesai.",
+            "order",
+            "/pembeli/pesanan"
+        );
+
+        // Notify sellers and credit wallet balance
+        foreach ($order->orderItems as $item) {
+            $sellerId = $item->product?->seller_id;
+            if ($sellerId) {
+                $subtotal = $item->price_at_sale * $item->quantity;
+                $seller = \App\Models\User::find($sellerId);
+                if ($seller) {
+                    $seller->increment('wallet_balance', $subtotal);
+                }
+
+                Notification::send(
+                    $sellerId,
+                    "Pesanan Selesai 🎉",
+                    "Pesanan #ORD-" . date('Y') . "-" . str_pad($order->id, 5, '0', STR_PAD_LEFT) . " telah diterima oleh pembeli. Pendapatan sebesar Rp " . number_format($subtotal, 0, ',', '.') . " telah ditambahkan ke dompet Anda.",
+                    "order",
+                    "/umkm/pesanan"
+                );
+            }
+        }
+
+        return response()->json([
+            'message' => 'Order completed successfully.',
+            'status' => $this->formatStatus('completed')
+        ]);
+    }
+
 
     public function uploadManualProof(Request $request)
     {
@@ -849,5 +935,187 @@ class MarketplaceController extends Controller
                 ['name' => 'Lainnya', 'pct' => 5, 'color' => 'bg-purple-500', 'border' => '#8b5cf6'],
             ]
         ]);
+    }
+
+    public function search(Request $request)
+    {
+        $query = $request->input('q', '');
+        $user = $request->user();
+        $role = $user->role;
+        $limit = (int)$request->input('limit', 15);
+
+        $results = [];
+
+        if (empty($query)) {
+            return response()->json([
+                'users' => [],
+                'umkms' => [],
+                'investors' => [],
+                'pembelis' => [],
+                'produks' => [],
+                'investasis' => [],
+                'pesanans' => [],
+                'laporans' => [],
+                'roi_history' => []
+            ]);
+        }
+
+        $searchString = "%{$query}%";
+
+        if ($role === 'Admin') {
+            $results['users'] = \App\Models\User::where('name', 'like', $searchString)
+                ->orWhere('email', 'like', $searchString)
+                ->limit($limit)
+                ->get();
+
+            $results['umkms'] = \App\Models\Umkm::where('name', 'like', $searchString)
+                ->orWhere('owner', 'like', $searchString)
+                ->limit($limit)
+                ->get();
+
+            $results['investors'] = \App\Models\Investor::where('name', 'like', $searchString)
+                ->limit($limit)
+                ->get();
+
+            $results['pembelis'] = \App\Models\Pembeli::where('name', 'like', $searchString)
+                ->limit($limit)
+                ->get();
+
+            $results['produks'] = \App\Models\Product::where('name', 'like', $searchString)
+                ->orWhere('description', 'like', $searchString)
+                ->limit($limit)
+                ->get();
+
+            $results['investasis'] = \App\Models\Investment::where('status', 'like', $searchString)
+                ->orWhereHas('user', function ($q) use ($searchString) { $q->where('name', 'like', $searchString); })
+                ->orWhereHas('umkm', function ($q) use ($searchString) { $q->where('name', 'like', $searchString); })
+                ->with(['user', 'umkm'])
+                ->limit($limit)
+                ->get();
+
+            $results['pesanans'] = \App\Models\Order::where('id', 'like', $searchString)
+                ->orWhere('status', 'like', $searchString)
+                ->orWhereHas('user', function ($q) use ($searchString) { $q->where('name', 'like', $searchString); })
+                ->with('user')
+                ->limit($limit)
+                ->get();
+
+            $results['laporans'] = \App\Models\RoiPayment::where('status', 'like', $searchString)
+                ->orWhereHas('investment.umkm', function ($q) use ($searchString) { $q->where('name', 'like', $searchString); })
+                ->orWhereHas('investment.user', function ($q) use ($searchString) { $q->where('name', 'like', $searchString); })
+                ->with(['investment.umkm', 'investment.user'])
+                ->limit($limit)
+                ->get();
+
+        } elseif ($role === 'Mitra UMKM') {
+            $results['produks'] = \App\Models\Product::where('seller_id', $user->id)
+                ->where(function($q) use ($searchString) {
+                    $q->where('name', 'like', $searchString)
+                      ->orWhere('description', 'like', $searchString);
+                })
+                ->limit($limit)
+                ->get();
+
+            $results['investors'] = \App\Models\Investor::where('name', 'like', $searchString)
+                ->orWhereHas('user.investments', function($q) use ($user) {
+                    $q->where('umkm_id', $user->id);
+                })
+                ->limit($limit)
+                ->get();
+
+            $results['investasis'] = \App\Models\Investment::where('umkm_id', $user->id)
+                ->where(function($q) use ($searchString) {
+                    $q->where('status', 'like', $searchString)
+                      ->orWhereHas('user', function($sq) use ($searchString) { $sq->where('name', 'like', $searchString); });
+                })
+                ->with('user')
+                ->limit($limit)
+                ->get();
+
+            $productIds = \App\Models\Product::where('seller_id', $user->id)->pluck('id');
+            $results['pesanans'] = \App\Models\Order::whereHas('orderItems', function ($q) use ($productIds) {
+                    $q->whereIn('product_id', $productIds);
+                })
+                ->where(function($q) use ($searchString) {
+                    $q->where('id', 'like', $searchString)
+                      ->orWhere('status', 'like', $searchString)
+                      ->orWhereHas('user', function ($sq) use ($searchString) { $sq->where('name', 'like', $searchString); });
+                })
+                ->with('user')
+                ->limit($limit)
+                ->get();
+
+            $results['laporans'] = \App\Models\RoiPayment::whereHas('investment', function($q) use ($user) {
+                    $q->where('umkm_id', $user->id);
+                })
+                ->where(function($q) use ($searchString) {
+                    $q->where('status', 'like', $searchString)
+                      ->orWhereHas('investment.user', function($sq) use ($searchString) { $sq->where('name', 'like', $searchString); });
+                })
+                ->with('investment.user')
+                ->limit($limit)
+                ->get();
+
+        } elseif ($role === 'Investor') {
+            $results['umkms'] = \App\Models\User::where('role', 'Mitra UMKM')
+                ->where(function($q) use ($searchString) {
+                    $q->where('name', 'like', $searchString)
+                      ->orWhereHas('umkm', function($sq) use ($searchString) { $sq->where('name', 'like', $searchString); });
+                })
+                ->with('umkm')
+                ->limit($limit)
+                ->get();
+
+            $results['investasis'] = \App\Models\Investment::where('user_id', $user->id)
+                ->where(function($q) use ($searchString) {
+                    $q->where('status', 'like', $searchString)
+                      ->orWhereHas('umkm', function($sq) use ($searchString) { $sq->where('name', 'like', $searchString); });
+                })
+                ->with('umkm')
+                ->limit($limit)
+                ->get();
+
+            $results['roi_history'] = \App\Models\RoiPayment::whereHas('investment', function($q) use ($user) {
+                    $q->where('user_id', $user->id);
+                })
+                ->where(function($q) use ($searchString) {
+                    $q->where('status', 'like', $searchString)
+                      ->orWhereHas('investment.umkm', function($sq) use ($searchString) { $sq->where('name', 'like', $searchString); });
+                })
+                ->with('investment.umkm')
+                ->limit($limit)
+                ->get();
+
+            $results['laporans'] = $results['roi_history'];
+
+        } else {
+            $results['produks'] = \App\Models\Product::where('status', 'approved')
+                ->where(function($q) use ($searchString) {
+                    $q->where('name', 'like', $searchString)
+                      ->orWhere('description', 'like', $searchString);
+                })
+                ->with('seller.umkm')
+                ->limit($limit)
+                ->get();
+
+            $results['umkms'] = \App\Models\User::where('role', 'Mitra UMKM')
+                ->where(function($q) use ($searchString) {
+                    $q->where('name', 'like', $searchString)
+                      ->orWhereHas('umkm', function($sq) use ($searchString) { $sq->where('name', 'like', $searchString); });
+                })
+                ->with('umkm')
+                ->limit($limit)
+                ->get();
+
+            $results['pesanans'] = \App\Models\Order::where('user_id', $user->id)
+                ->where(function($q) use ($searchString) {
+                    $q->where('id', 'like', $searchString)
+                      ->orWhere('status', 'like', $searchString);
+                })
+                ->limit($limit)
+                ->get();
+        }
+
+        return response()->json($results);
     }
 }

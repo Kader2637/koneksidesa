@@ -12,7 +12,7 @@ export default function PesananPage() {
   const handleAdvanceStatus = () => {
     if (confirmModal) {
       advanceOrderStatus(confirmModal.id);
-      const nextStatus = confirmModal.currentStatus === "Pending" ? "Diproses" : "Dikirim";
+      const nextStatus = confirmModal.currentStatus === "Pending" ? "Diproses" : "Selesai";
       toast.success(`Pesanan #${confirmModal.id} di-update menjadi: ${nextStatus}!`);
       setConfirmModal(null);
     }
@@ -72,13 +72,13 @@ export default function PesananPage() {
               </div>
 
               {/* Control buttons */}
-              {ord.status !== "Dikirim" && (
+              {ord.status !== "Selesai" && (
                 <div className="flex justify-end pt-4 border-t border-slate-100">
                   <button
                     onClick={() => setConfirmModal({ id: ord.id, currentStatus: ord.status })}
                     className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-lg text-xs transition cursor-pointer flex items-center gap-1.5 shadow-sm border-none uppercase tracking-wider"
                   >
-                    {ord.status === "Pending" ? "Terima & Proses Pesanan" : "Kirim ke Kurir"}
+                    {ord.status === "Pending" ? "Terima & Proses Pesanan" : "Selesaikan Pesanan"}
                   </button>
                 </div>
               )}
@@ -99,8 +99,8 @@ export default function PesananPage() {
               <h3 className="font-heading font-black text-slate-900 text-base">Konfirmasi Pembaruan Status</h3>
               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">Pembaruan Alur Logistik</p>
             </div>
-            <p className="text-xs text-slate-500 leading-relaxed font-semibold">
-              Apakah Anda yakin ingin memperbarui status pesanan <strong className="text-slate-800">#{confirmModal.id}</strong> menjadi <strong className="text-slate-800">{confirmModal.currentStatus === "Pending" ? "DIPROSES" : "DIKIRIM"}</strong>?
+            <p className="text-xs text-slate-550 leading-relaxed font-semibold">
+              Apakah Anda yakin ingin memperbarui status pesanan <strong className="text-slate-800">#{confirmModal.id}</strong> menjadi <strong className="text-slate-800">{confirmModal.currentStatus === "Pending" ? "DIPROSES" : "SELESAI"}</strong>?
             </p>
             <div className="flex gap-2 pt-2">
               <button

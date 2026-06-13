@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { User, ShieldCheck, Mail, Phone, CreditCard, Wallet, Plus, ArrowDownLeft, Save } from "lucide-react";
 import { useInvestor } from "../layout";
 import { toast } from "@/components/ui/Toast";
+import Select2 from "@/components/ui/Select2";
 
 export default function InvestorProfilPage() {
   const { 
@@ -26,6 +27,9 @@ export default function InvestorProfilPage() {
   const [savingProfile, setSavingProfile] = useState(false);
   const [walletAmount, setWalletAmount] = useState("");
   const [walletLoading, setWalletLoading] = useState(false);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string>("");
+  const [deleteAvatar, setDeleteAvatar] = useState(false);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -40,29 +44,70 @@ export default function InvestorProfilPage() {
           bank_name: u.bank_name || "Bank Mandiri",
           bank_account: u.bank_account || "137-00-1234567-8"
         });
+        if (u.avatar) {
+          setAvatarPreview(u.avatar);
+        }
       } catch (e) {
         console.error(e);
       }
     }
   }, []);
 
-  const handleProfileSubmit = (e: React.FormEvent) => {
+  const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSavingProfile(true);
-    setTimeout(() => {
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("Anda belum login!");
       setSavingProfile(false);
-      const storedUser = localStorage.getItem("user");
-      if (storedUser) {
-        try {
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("name", profile.name);
+    formData.append("phone_number", profile.phone_number);
+    formData.append("address", profile.address);
+    if (avatarFile) {
+      formData.append("avatar", avatarFile);
+    }
+    if (deleteAvatar) {
+      formData.append("delete_avatar", "true");
+    }
+
+    try {
+      const res = await fetch("http://localhost:8000/api/auth/profile/update", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        // Sync local storage
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
           const u = JSON.parse(storedUser);
-          const updated = { ...u, ...profile };
+          const updated = { ...u, ...profile, avatar: data.user.avatar };
           localStorage.setItem("user", JSON.stringify(updated));
-        } catch (err) {
-          console.error(err);
         }
+        // Emit profile-updated event
+        window.dispatchEvent(new Event("profile-updated"));
+        toast.success("Profil berhasil diperbarui!");
+        setAvatarFile(null);
+        setDeleteAvatar(false);
+      } else {
+        const err = await res.json();
+        toast.error("Gagal memperbarui profil: " + (err.message || "kesalahan tidak diketahui"));
       }
-      toast.success("Profil dan data rekening investor berhasil disimpan!");
-    }, 800);
+    } catch (err) {
+      console.error(err);
+      toast.error("Terjadi kesalahan saat menyimpan profil.");
+    } finally {
+      setSavingProfile(false);
+    }
   };
 
   const handleDeposit = async () => {
@@ -170,6 +215,57 @@ export default function InvestorProfilPage() {
           </h3>
 
           <form onSubmit={handleProfileSubmit} className="space-y-4 text-xs font-bold text-slate-700">
+            {/* Avatar Upload Section */}
+            <div className="flex items-center gap-5 pb-4 border-b border-slate-100/80">
+              <div className="relative w-16 h-16 rounded-full overflow-hidden bg-slate-100 border border-slate-200 flex-shrink-0 flex items-center justify-center">
+                {avatarPreview ? (
+                  <img src={avatarPreview} alt="Preview Avatar" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg">
+                    {profile.name ? profile.name.split(" ").map(n => n.charAt(0)).join("").substring(0, 2).toUpperCase() : "IV"}
+                  </div>
+                )}
+              </div>
+              <div className="space-y-1.5">
+                <span className="text-[10px] font-black uppercase tracking-wider text-slate-450 block">Foto Profil</span>
+                <div className="flex gap-2 items-center">
+                  <label className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-[10px] font-black uppercase tracking-wider text-slate-650 hover:bg-slate-100 transition cursor-pointer flex items-center gap-1.5">
+                    Unggah Foto
+                    <input 
+                      type="file" 
+                      accept="image/jpeg,image/jpg,image/png" 
+                      className="hidden" 
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          if (file.size > 2048 * 1024) {
+                            toast.error("Ukuran file maksimal adalah 2MB!");
+                            return;
+                          }
+                          setAvatarFile(file);
+                          setDeleteAvatar(false);
+                          setAvatarPreview(URL.createObjectURL(file));
+                        }
+                      }}
+                    />
+                  </label>
+                  {avatarPreview && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAvatarFile(null);
+                        setDeleteAvatar(true);
+                        setAvatarPreview("");
+                      }}
+                      className="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-650 text-[10px] font-black uppercase tracking-wider rounded-lg transition cursor-pointer"
+                    >
+                      Hapus Foto
+                    </button>
+                  )}
+                </div>
+                <span className="text-[9px] text-slate-400 block">Maksimal 2MB (JPG, JPEG, PNG).</span>
+              </div>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2 flex flex-col">
                 <label className="tracking-wide text-xs text-slate-500">Nama Lengkap</label>
@@ -221,16 +317,18 @@ export default function InvestorProfilPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2 flex flex-col">
                 <label className="tracking-wide text-xs text-slate-500">Nama Bank</label>
-                <select
+                <Select2
+                  options={[
+                    { value: "Bank Mandiri", label: "Bank Mandiri" },
+                    { value: "Bank BRI", label: "Bank BRI" },
+                    { value: "Bank BCA", label: "Bank BCA" },
+                    { value: "Bank BNI", label: "Bank BNI" }
+                  ]}
                   value={profile.bank_name}
-                  onChange={(e) => setProfile({ ...profile, bank_name: e.target.value })}
-                  className="w-full bg-slate-55 border border-slate-200 rounded-xl px-4 py-3 text-slate-800 outline-none focus:bg-white focus:border-indigo-500 transition font-extrabold cursor-pointer"
-                >
-                  <option>Bank Mandiri</option>
-                  <option>Bank BRI</option>
-                  <option>Bank BCA</option>
-                  <option>Bank BNI</option>
-                </select>
+                  onChange={(val) => setProfile({ ...profile, bank_name: val || "Bank Mandiri" })}
+                  isClearable={false}
+                  isSearchable={true}
+                />
               </div>
 
               <div className="space-y-2 flex flex-col">

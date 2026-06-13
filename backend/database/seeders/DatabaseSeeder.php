@@ -218,14 +218,16 @@ class DatabaseSeeder extends Seeder
         // ----------------------------------------------------
         // 4. Seed Investments
         // ----------------------------------------------------
-        Investment::create([
+        $invSeeded = Investment::create([
             'user_id' => $investor->id,
             'umkm_id' => $seller3->id,
             'pendanaan_id' => $campaign2->id,
             'amount' => 5000000.00,
             'expected_return' => 5550000.00,
+            'roi' => 11,
             'status' => 'Aktif'
         ]);
+        Investment::generateSchedules($invSeeded, 11, '3 Bulan', 5000000.00);
 
         // ----------------------------------------------------
         // 5. Seed Loan Requests (UMKM Pinjaman)

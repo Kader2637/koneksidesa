@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import Image from "@/components/ui/Image";
@@ -27,6 +27,7 @@ export default function Home() {
   const [campaigns, setCampaigns] = useState<any[]>([]);
   const [activeTxIndex, setActiveTxIndex] = useState(0);
   const [activeTestimonial, setActiveTestimonial] = useState(0);
+  const [liveStats, setLiveStats] = useState<any>(null);
 
   const handlePortalClick = async (roleName: string, href: string) => {
     const mappedRole = roleName === "Admin Desa" ? "Admin"
@@ -69,6 +70,16 @@ export default function Home() {
   };
 
   useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await fetch("http://localhost:8000/api/public-stats");
+        if (res.ok) {
+          setLiveStats(await res.json());
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
     const fetchProducts = async () => {
       try {
         const res = await fetch("http://localhost:8000/api/bazar-products");
@@ -100,6 +111,7 @@ export default function Home() {
         }
       } catch (err) { console.error(err); }
     };
+    fetchStats();
     fetchProducts();
     fetchCampaigns();
   }, []);
@@ -121,12 +133,31 @@ export default function Home() {
     return () => clearInterval(iv);
   }, []);
 
-  const stats = [
-    { value: 2400, suffix: "+", label: "Produk UMKM", icon: Package },
-    { value: 180, suffix: "+", label: "Desa Bergabung", icon: MapPin },
-    { value: 98, suffix: "%", label: "Kepuasan Pembeli", icon: Star },
-    { value: 12, prefix: "Rp", suffix: "M+", label: "Total Transaksi", icon: Wallet },
-  ];
+  const stats = useMemo(() => {
+    const totalUmkm = liveStats?.total_umkm || 5;
+    const totalInvestors = liveStats?.total_investors || 3;
+    const totalBuyers = liveStats?.total_buyers || 2;
+    const circulation = liveStats?.financial_circulation || 12000000;
+    
+    // format circulation
+    let circVal = 12;
+    let circSuffix = "M+";
+    let circPrefix = "Rp ";
+    if (circulation >= 1000000000) {
+      circVal = Math.round(circulation / 1000000000);
+      circSuffix = "M+";
+    } else if (circulation >= 1000000) {
+      circVal = Math.round(circulation / 1000000);
+      circSuffix = "Jt+";
+    }
+
+    return [
+      { value: totalUmkm, suffix: "+", label: "Mitra UMKM", icon: Store },
+      { value: totalInvestors, suffix: "+", label: "Investor Aktif", icon: Users },
+      { value: totalBuyers, suffix: "+", label: "Pembeli Terdaftar", icon: ShoppingBag },
+      { value: circVal, prefix: circPrefix, suffix: circSuffix, label: "Perputaran Finansial", icon: Wallet },
+    ];
+  }, [liveStats]);
 
   const features = [
     { icon: ShoppingBag, title: "Bazar Digital Desa", desc: "Belanja langsung dari pengrajin UMKM tanpa perantara. Harga transparan, kualitas terjamin, dan pengiriman ke seluruh Indonesia.", color: "text-emerald-600", bg: "bg-emerald-50", href: "/katalog" },

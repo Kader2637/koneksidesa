@@ -6,6 +6,7 @@ import { Send, FileText, Plus, Landmark, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useUMKM } from "../layout";
 import { toast } from "@/components/ui/Toast";
+import Select2 from "@/components/ui/Select2";
 
 export default function UMKMPendanaanPage() {
   const {
@@ -109,17 +110,18 @@ export default function UMKMPendanaanPage() {
           <form onSubmit={triggerSubmit} className="space-y-4 text-xs font-bold text-slate-700">
             <div className="space-y-2 flex flex-col">
               <label className="tracking-wide text-xs text-slate-500">Pilih Investor Tujuan</label>
-              <select
-                required
+              <Select2
+                options={investors.map((inv) => ({
+                  value: inv.id.toString(),
+                  label: inv.name,
+                  sublabel: inv.email
+                }))}
                 value={selectedInvestorId}
-                onChange={(e) => setSelectedInvestorId(e.target.value)}
-                className="w-full bg-slate-55 border border-slate-200 rounded-xl px-4 py-3 text-slate-800 outline-none focus:bg-white focus:border-emerald-500 transition font-extrabold cursor-pointer"
-              >
-                <option value="">-- Pilih Investor --</option>
-                {investors.map((inv) => (
-                  <option key={inv.id} value={inv.id}>{inv.name} ({inv.email})</option>
-                ))}
-              </select>
+                onChange={(val) => setSelectedInvestorId(val || "")}
+                placeholder="Pilih Investor..."
+                isClearable={true}
+                isSearchable={true}
+              />
             </div>
 
             <div className="space-y-2 flex flex-col">
@@ -161,15 +163,17 @@ export default function UMKMPendanaanPage() {
 
               <div className="space-y-2 flex flex-col">
                 <label className="tracking-wide text-xs text-slate-500">Jangka Waktu (Tenor)</label>
-                <select
+                <Select2
+                  options={[
+                    { value: "6 Bulan", label: "6 Bulan" },
+                    { value: "12 Bulan", label: "12 Bulan" },
+                    { value: "24 Bulan", label: "24 Bulan" }
+                  ]}
                   value={proposalTenor}
-                  onChange={(e) => setProposalTenor(e.target.value)}
-                  className="w-full bg-slate-55 border border-slate-200 rounded-xl px-4 py-3 text-slate-800 outline-none focus:bg-white focus:border-emerald-500 transition font-extrabold cursor-pointer"
-                >
-                  <option>6 Bulan</option>
-                  <option>12 Bulan</option>
-                  <option>24 Bulan</option>
-                </select>
+                  onChange={(val) => setProposalTenor(val || "12 Bulan")}
+                  isClearable={false}
+                  isSearchable={false}
+                />
               </div>
             </div>
 

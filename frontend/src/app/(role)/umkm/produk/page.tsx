@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Plus, Trash2, Edit2, X, Sparkles, Image as ImageIcon } from "lucide-react";
 import { useUMKM } from "../layout";
 import { toast } from "@/components/ui/Toast";
+import Select2 from "@/components/ui/Select2";
 
 export default function ProdukPage() {
   const { products, addProduct, updateProduct, deleteProduct } = useUMKM();
@@ -185,16 +186,18 @@ export default function ProdukPage() {
 
             <div className="space-y-2 flex flex-col">
               <label className="text-slate-500 tracking-wide text-xs">Kategori</label>
-              <select
+              <Select2
+                options={[
+                  { value: "Minuman", label: "Minuman" },
+                  { value: "Kerajinan", label: "Kerajinan" },
+                  { value: "Konsumsi", label: "Konsumsi" },
+                  { value: "Dekorasi", label: "Dekorasi" }
+                ]}
                 value={prodCategory}
-                onChange={(e) => setProdCategory(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-255 rounded-xl px-4 py-3 text-slate-800 outline-none focus:bg-white focus:border-emerald-500 transition-all font-bold cursor-pointer"
-              >
-                <option>Minuman</option>
-                <option>Kerajinan</option>
-                <option>Konsumsi</option>
-                <option>Dekorasi</option>
-              </select>
+                onChange={(val) => setProdCategory(val || "Minuman")}
+                isClearable={false}
+                isSearchable={true}
+              />
             </div>
 
             <div className="space-y-2 flex flex-col">

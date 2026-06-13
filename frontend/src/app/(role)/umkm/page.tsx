@@ -15,7 +15,8 @@ export default function MerchantDashboard() {
     products, 
     orders, 
     umkmInvestasis,
-    umkmPendanaans
+    umkmPendanaans,
+    financeStats
   } = useUMKM();
 
   // Metrics computing
@@ -93,67 +94,123 @@ export default function MerchantDashboard() {
         </div>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        
-        {/* Total Produk */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 flex flex-col justify-between h-32 shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-300 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-full blur-xl pointer-events-none" />
-          <div className="flex justify-between items-start">
-            <p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Total Produk</p>
-            <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center border border-blue-100">
-              <Package className="w-3.5 h-3.5 text-blue-600" />
+      {/* SECTION 1: IKHTISAR KEUANGAN TOKO */}
+      <div className="space-y-3">
+        <h3 className="text-[10px] font-black text-slate-450 uppercase tracking-widest flex items-center gap-2">
+          Ikhtisar Keuangan Toko
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {/* Keuangan Toko (Saldo Dompet) */}
+          <div className="bg-gradient-to-br from-slate-900 to-slate-800 p-5 rounded-2xl border border-slate-950 flex flex-col justify-between h-32 shadow-md relative overflow-hidden text-white">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl pointer-events-none" />
+            <div className="flex justify-between items-start">
+              <p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Keuangan Toko (Saldo Dompet)</p>
+              <div className="w-7 h-7 rounded-lg bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30">
+                <DollarSign className="w-3.5 h-3.5 text-emerald-400" />
+              </div>
             </div>
+            <h3 className="text-xl font-black text-white">Rp {financeStats?.wallet_balance?.toLocaleString("id-ID") ?? 0}</h3>
+            <span className="text-[9px] text-emerald-400 font-black uppercase tracking-wider flex items-center gap-1 bg-emerald-500/10 w-fit px-2.5 py-0.5 rounded-md border border-emerald-500/20">
+              Saldo Kas Cair
+            </span>
           </div>
-          <h3 className="text-xl font-black text-slate-900">{totalProductsCount} Item</h3>
-          <span className="text-[9px] text-blue-705 font-black uppercase tracking-wider flex items-center gap-1 bg-blue-50 w-fit px-2.5 py-0.5 rounded-md border border-blue-100">
-            Terpajang Ritel
-          </span>
-        </div>
 
-        {/* Total Pesanan */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 flex flex-col justify-between h-32 shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-300 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/5 rounded-full blur-xl pointer-events-none" />
-          <div className="flex justify-between items-start">
-            <p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Total Pesanan</p>
-            <div className="w-7 h-7 rounded-lg bg-amber-50 flex items-center justify-center border border-amber-100">
-              <ShoppingBag className="w-3.5 h-3.5 text-amber-600" />
+          {/* Statistik Pemasukan (Omset Penjualan) */}
+          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 flex flex-col justify-between h-32 shadow-sm hover:shadow-md hover:border-slate-350 transition-all duration-300 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-full blur-xl pointer-events-none" />
+            <div className="flex justify-between items-start">
+              <p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Statistik Pemasukan (Total Penjualan)</p>
+              <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center border border-blue-100">
+                <TrendingUp className="w-3.5 h-3.5 text-blue-600" />
+              </div>
             </div>
+            <h3 className="text-xl font-black text-slate-900">Rp {financeStats?.total_sales_revenue?.toLocaleString("id-ID") ?? 0}</h3>
+            <span className="text-[9px] text-blue-705 font-black uppercase tracking-wider flex items-center gap-1 bg-blue-50 w-fit px-2.5 py-0.5 rounded-md border border-blue-100">
+              Omset Transaksi
+            </span>
           </div>
-          <h3 className="text-xl font-black text-slate-900">{totalOrdersCount} Pesanan</h3>
-          <span className="text-[9px] text-amber-705 font-black uppercase tracking-wider flex items-center gap-1 bg-amber-50 w-fit px-2.5 py-0.5 rounded-md border border-amber-100">
-            Masuk & Diproses
-          </span>
-        </div>
 
-        {/* Total Dana Masuk */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 flex flex-col justify-between h-32 shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-300 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/5 rounded-full blur-xl pointer-events-none" />
-          <div className="flex justify-between items-start">
-            <p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Total Dana Masuk</p>
-            <div className="w-7 h-7 rounded-lg bg-indigo-50 flex items-center justify-center border border-indigo-100">
-              <DollarSign className="w-3.5 h-3.5 text-indigo-600" />
+          {/* Statistik Investor (Total Dana Investor) */}
+          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 flex flex-col justify-between h-32 shadow-sm hover:shadow-md hover:border-slate-350 transition-all duration-300 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/5 rounded-full blur-xl pointer-events-none" />
+            <div className="flex justify-between items-start">
+              <p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Statistik Investor (Total Dana Investor)</p>
+              <div className="w-7 h-7 rounded-lg bg-indigo-50 flex items-center justify-center border border-indigo-100">
+                <Users className="w-3.5 h-3.5 text-indigo-600" />
+              </div>
             </div>
+            <h3 className="text-xl font-black text-slate-900">Rp {financeStats?.total_investor_funds?.toLocaleString("id-ID") ?? 0}</h3>
+            <span className="text-[9px] text-indigo-705 font-black uppercase tracking-wider flex items-center gap-1 bg-indigo-50 w-fit px-2.5 py-0.5 rounded-md border border-indigo-100">
+              Modal Investasi Masuk
+            </span>
           </div>
-          <h3 className="text-xl font-black text-slate-900">Rp {totalFundingReceived.toLocaleString("id-ID")}</h3>
-          <span className="text-[9px] text-indigo-705 font-black uppercase tracking-wider flex items-center gap-1 bg-indigo-50 w-fit px-2.5 py-0.5 rounded-md border border-indigo-100">
-            Dari Investor
-          </span>
-        </div>
 
-        {/* Total Investor */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 flex flex-col justify-between h-32 shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-300 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/5 rounded-full blur-xl pointer-events-none" />
-          <div className="flex justify-between items-start">
-            <p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Total Investor</p>
-            <div className="w-7 h-7 rounded-lg bg-purple-50 flex items-center justify-center border border-purple-100">
-              <Store className="w-3.5 h-3.5 text-purple-600" />
+          {/* Total Dana Gabungan */}
+          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 flex flex-col justify-between h-32 shadow-sm hover:shadow-md hover:border-slate-350 transition-all duration-300 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/5 rounded-full blur-xl pointer-events-none" />
+            <div className="flex justify-between items-start">
+              <p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Total Dana Gabungan</p>
+              <div className="w-7 h-7 rounded-lg bg-purple-50 flex items-center justify-center border border-purple-100">
+                <Store className="w-3.5 h-3.5 text-purple-600" />
+              </div>
+            </div>
+            <h3 className="text-xl font-black text-slate-900">Rp {financeStats?.total_combined?.toLocaleString("id-ID") ?? 0}</h3>
+            <span className="text-[9px] text-purple-705 font-black uppercase tracking-wider flex items-center gap-1 bg-purple-50 w-fit px-2.5 py-0.5 rounded-md border border-purple-100">
+              Pemasukan + Investasi
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* SECTION 2: METRIK OPERASIONAL TOKO */}
+      <div className="space-y-3">
+        <h3 className="text-[10px] font-black text-slate-450 uppercase tracking-widest flex items-center gap-2">
+          Performa & Metrik Toko
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {/* Total Produk */}
+          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+              <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider block">Total Produk Terpajang</span>
+              <h3 className="text-base font-extrabold text-slate-900 mt-0.5">{totalProductsCount} Item</h3>
+            </div>
+            <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
+              <Package className="w-4 h-4" />
             </div>
           </div>
-          <h3 className="text-xl font-black text-slate-900">{activeInvestorsCount} Mitra</h3>
-          <span className="text-[9px] text-purple-705 font-black uppercase tracking-wider flex items-center gap-1 bg-purple-50 w-fit px-2.5 py-0.5 rounded-md border border-purple-100">
-            Pendana Aktif
-          </span>
+
+          {/* Total Pesanan */}
+          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+              <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider block">Total Pesanan Masuk</span>
+              <h3 className="text-base font-extrabold text-slate-900 mt-0.5">{totalOrdersCount} Transaksi</h3>
+            </div>
+            <div className="w-9 h-9 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600">
+              <ShoppingBag className="w-4 h-4" />
+            </div>
+          </div>
+
+          {/* Total Investor Aktif */}
+          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+              <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider block">Investor Aktif</span>
+              <h3 className="text-base font-extrabold text-slate-900 mt-0.5">{activeInvestorsCount} Investor</h3>
+            </div>
+            <div className="w-9 h-9 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-650">
+              <Users className="w-4 h-4" />
+            </div>
+          </div>
+
+          {/* Kampanye Pendanaan Aktif */}
+          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+              <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider block">Kampanye Pendanaan</span>
+              <h3 className="text-base font-extrabold text-slate-900 mt-0.5">{umkmPendanaans.length} Pengajuan</h3>
+            </div>
+            <div className="w-9 h-9 rounded-lg bg-purple-50 flex items-center justify-center text-purple-600">
+              <Store className="w-4 h-4" />
+            </div>
+          </div>
         </div>
       </div>
 

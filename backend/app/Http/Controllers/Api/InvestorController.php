@@ -56,8 +56,12 @@ class InvestorController extends Controller
                 'pendanaan_id' => $campaign->id,
                 'amount' => $amount,
                 'expected_return' => $expectedReturn,
+                'roi' => $campaign->roi,
                 'status' => 'Aktif',
             ]);
+
+            // Generate ROI payment schedules
+            Investment::generateSchedules($investment, $campaign->roi, $campaign->tenor, $amount);
 
             Notification::send(
                 $user->id,
@@ -259,16 +263,22 @@ class InvestorController extends Controller
                     'progress' => 100
                 ]);
 
+                // Calculate expected return
+                $expectedReturn = $amount + ($amount * (($pendanaan->roi ?? 0) / 100));
+
                 // Create investment holding
-                $expectedReturn = $amount + ($amount * ($pendanaan->roi / 100));
-                Investment::create([
+                $investment = Investment::create([
                     'user_id' => $investor->id,
                     'umkm_id' => $pendanaan->user_id,
                     'pendanaan_id' => $pendanaan->id,
                     'amount' => $amount,
                     'expected_return' => $expectedReturn,
+                    'roi' => $pendanaan->roi,
                     'status' => 'Aktif'
                 ]);
+
+                // Generate ROI payment schedules
+                Investment::generateSchedules($investment, $pendanaan->roi, $pendanaan->tenor, $amount);
 
                 // Notify UMKM
                 Notification::send(
@@ -321,6 +331,7 @@ class InvestorController extends Controller
             'umkm_id' => $request->umkm_id,
             'amount' => $amount,
             'expected_return' => $amount + ($amount * ($roi / 100)),
+            'roi' => $roi,
             'message' => $request->message,
             'tenor' => $request->tenor,
             'status' => 'Pending'
@@ -368,6 +379,9 @@ class InvestorController extends Controller
                 // Update investment to active status
                 $investment->update(['status' => 'Aktif']);
 
+                // Generate ROI payment schedules
+                Investment::generateSchedules($investment, $investment->roi, $investment->tenor, $investment->amount);
+
                 // Notify investor
                 Notification::send(
                     $investment->user_id,
@@ -413,7 +427,7 @@ class InvestorController extends Controller
     public function umkmInvestasis(Request $request)
     {
         $investasis = Investment::where('umkm_id', $request->user()->id)
-            ->with('user')
+            ->with(['user', 'roiPayments'])
             ->latest()
             ->get();
         return response()->json($investasis);
@@ -422,7 +436,7 @@ class InvestorController extends Controller
     public function investorInvestasis(Request $request)
     {
         $investasis = Investment::where('user_id', $request->user()->id)
-            ->with('umkm')
+            ->with(['umkm', 'roiPayments'])
             ->latest()
             ->get();
         return response()->json($investasis);
@@ -441,5 +455,73 @@ class InvestorController extends Controller
                 ]);
             });
         return response()->json($pendanaans);
+    }
+
+    public function payRoiManual(Request $request, $id)
+    {
+        $schedule = \App\Models\RoiPayment::findOrFail($id);
+        $investment = $schedule->investment;
+
+        if (!$investment) {
+            return response()->json(['message' => 'Investment data not found.'], 404);
+        }
+
+        $umkmUser = \App\Models\User::findOrFail($request->user()->id);
+
+        if ($investment->umkm_id !== $umkmUser->id) {
+            return response()->json(['message' => 'Unauthorized. Only the respective UMKM can settle this ROI.'], 403);
+        }
+
+        if ($schedule->status === 'Lunas') {
+            return response()->json(['message' => 'This schedule is already paid.'], 400);
+        }
+
+        if ($umkmUser->wallet_balance < $schedule->nominal) {
+            return response()->json(['message' => 'Saldo dompet tidak mencukupi untuk melakukan pembayaran manual.'], 400);
+        }
+
+        return DB::transaction(function () use ($umkmUser, $schedule, $investment) {
+            $investorUser = \App\Models\User::find($investment->user_id);
+
+
+            // Deduct UMKM
+            $umkmUser->decrement('wallet_balance', $schedule->nominal);
+
+            // Add to Investor
+            if ($investorUser) {
+                $investorUser->increment('wallet_balance', $schedule->nominal);
+            }
+
+            // Update schedule
+            $schedule->update([
+                'status' => 'Lunas',
+                'tanggal_bayar' => now(),
+                'metode_pembayaran' => 'Manual'
+            ]);
+
+            // Notify both parties
+            Notification::send(
+                $umkmUser->id,
+                "Setoran ROI Manual Sukses 💰",
+                "Setoran ROI manual bulan ke-{$schedule->bulan_ke} sebesar Rp " . number_format($schedule->nominal, 0, ',', '.') . " sukses diproses.",
+                "investment",
+                "/umkm"
+            );
+
+            if ($investorUser) {
+                Notification::send(
+                    $investorUser->id,
+                    "Penerimaan ROI Manual 💵",
+                    "Anda menerima pembayaran bagi hasil ROI manual bulan ke-{$schedule->bulan_ke} sebesar Rp " . number_format($schedule->nominal, 0, ',', '.') . " dari UMKM {$umkmUser->name}.",
+                    "investment",
+                    "/investor/portfolio"
+                );
+            }
+
+            return response()->json([
+                'message' => 'Setoran ROI manual berhasil diselesaikan.',
+                'schedule' => $schedule
+            ]);
+        });
     }
 }

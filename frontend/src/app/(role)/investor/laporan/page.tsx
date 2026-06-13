@@ -30,10 +30,10 @@ export default function InvestorLaporanPage() {
       if (!list.some(x => x.id === item.id)) {
         list.push({
           id: item.id,
-          umkm: `UMKM ID ${item.umkm_id}`,
+          umkm: item.umkm?.name || `UMKM ID ${item.umkm_id}`,
           title: "Pembiayaan Langsung",
           amount: Number(item.amount),
-          roi: 12, // default / fallback
+          roi: item.roi || 12,
           status: item.status === "Aktif" ? "Diterima" : item.status,
           type: "Investasi Langsung"
         });
