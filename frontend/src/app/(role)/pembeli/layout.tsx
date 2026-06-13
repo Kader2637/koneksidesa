@@ -131,7 +131,7 @@ export default function PembeliLayout() {
     const token = localStorage.getItem("token");
     if (!token) return;
     try {
-      const response = await fetch("http://localhost:8000/api/carts", {
+      const response = await fetch(`http://localhost:8000/api/carts?t=${Date.now()}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (response.ok) {
@@ -142,6 +142,7 @@ export default function PembeliLayout() {
       console.error("Fetch cart error:", err);
     }
   };
+
 
   useEffect(() => {
     fetchCart();

@@ -312,7 +312,12 @@ class MarketplaceController extends Controller
             $orders = Order::with(['user', 'orderItems.product'])->latest()->get();
         }
 
-        $formatted = $orders->map(function ($item) {
+        $reviewedProductIds = [];
+        if ($user && $user->role === 'Pembeli') {
+            $reviewedProductIds = \App\Models\Review::where('user_id', $user->id)->pluck('product_id')->toArray();
+        }
+
+        $formatted = $orders->map(function ($item) use ($reviewedProductIds) {
             $items = collect($item->orderItems ?? []);
             $summaryParts = [];
             foreach ($items as $ot) {
@@ -339,6 +344,18 @@ class MarketplaceController extends Controller
                 $vaNumber = $item->transaction_id;
             }
 
+            $statusText = $this->formatStatus($item->status);
+            $isSelesai = $statusText === 'Selesai';
+            $hasUnreviewed = false;
+            if ($isSelesai) {
+                foreach ($items as $ot) {
+                    if ($ot->product_id && !in_array($ot->product_id, $reviewedProductIds)) {
+                        $hasUnreviewed = true;
+                        break;
+                    }
+                }
+            }
+
             return [
                 'id' => 'ORD-' . date('Y') . '-' . str_pad($item->id, 5, '0', STR_PAD_LEFT),
                 'raw_id' => $item->id,
@@ -347,7 +364,7 @@ class MarketplaceController extends Controller
                 'product' => count($summaryParts) > 0 ? $items[0]->product->name ?? 'Produk' : 'Produk',
                 'qty' => count($summaryParts) > 0 ? $items[0]->quantity : 0,
                 'total' => (int)$item->total_price,
-                'status' => $this->formatStatus($item->status),
+                'status' => $statusText,
                 'date' => $item->created_at->toDateString(),
                 'payment_method' => match($item->payment_type) {
                     'cod'    => 'COD — Bayar di Tempat',
@@ -357,13 +374,16 @@ class MarketplaceController extends Controller
                 'snap_token' => $snapToken,
                 'snap_url' => $snapUrl,
                 'midtrans_order_id' => $midtransOrderId,
-                'items' => $items->map(function ($ot) {
+                'has_unreviewed_items' => $hasUnreviewed,
+                'is_reviewed' => (count($summaryParts) > 0 && in_array($items[0]->product_id, $reviewedProductIds)),
+                'items' => $items->map(function ($ot) use ($reviewedProductIds) {
                     return [
                         'product_id' => $ot->product_id,
                         'name' => $ot->product->name ?? 'Produk',
                         'quantity' => $ot->quantity,
                         'price' => (int)$ot->price_at_sale,
-                        'image' => $ot->product->image ?? ''
+                        'image' => $ot->product->image ?? '',
+                        'is_reviewed' => in_array($ot->product_id, $reviewedProductIds)
                     ];
                 })->toArray(),
             ];

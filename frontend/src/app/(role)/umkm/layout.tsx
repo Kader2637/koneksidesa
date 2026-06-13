@@ -123,7 +123,7 @@ export default function UMKMLayout() {
     const token = localStorage.getItem("token");
     if (!token) return;
     try {
-      const res = await fetch("http://localhost:8000/api/umkm/products", { headers: { "Authorization": `Bearer ${token}` } });
+      const res = await fetch(`http://localhost:8000/api/umkm/products?t=${Date.now()}`, { headers: { "Authorization": `Bearer ${token}` } });
       if (res.ok) {
         const data = await res.json();
         setProducts(data.map((item: any) => ({
@@ -139,7 +139,7 @@ export default function UMKMLayout() {
     const token = localStorage.getItem("token");
     if (!token) return;
     try {
-      const res = await fetch("http://localhost:8000/api/umkm/orders", { headers: { "Authorization": `Bearer ${token}` } });
+      const res = await fetch(`http://localhost:8000/api/umkm/orders?t=${Date.now()}`, { headers: { "Authorization": `Bearer ${token}` } });
       if (res.ok) setOrders(await res.json());
     } catch (err) { console.error(err); }
   };
@@ -148,7 +148,7 @@ export default function UMKMLayout() {
     const token = localStorage.getItem("token");
     if (!token) return;
     try {
-      const res = await fetch("http://localhost:8000/api/umkm/loans", { headers: { "Authorization": `Bearer ${token}` } });
+      const res = await fetch(`http://localhost:8000/api/umkm/loans?t=${Date.now()}`, { headers: { "Authorization": `Bearer ${token}` } });
       if (res.ok) setLoans(await res.json());
     } catch (err) { console.error(err); }
   };
@@ -157,7 +157,7 @@ export default function UMKMLayout() {
     const token = localStorage.getItem("token");
     if (!token) return;
     try {
-      const res = await fetch("http://localhost:8000/api/umkm/investors", { headers: { "Authorization": `Bearer ${token}` } });
+      const res = await fetch(`http://localhost:8000/api/umkm/investors?t=${Date.now()}`, { headers: { "Authorization": `Bearer ${token}` } });
       if (res.ok) setInvestors(await res.json());
     } catch (err) { console.error(err); }
   };
@@ -166,7 +166,7 @@ export default function UMKMLayout() {
     const token = localStorage.getItem("token");
     if (!token) return;
     try {
-      const res = await fetch("http://localhost:8000/api/umkm/pendanaan", { headers: { "Authorization": `Bearer ${token}` } });
+      const res = await fetch(`http://localhost:8000/api/umkm/pendanaan?t=${Date.now()}`, { headers: { "Authorization": `Bearer ${token}` } });
       if (res.ok) setUmkmPendanaans(await res.json());
     } catch (err) { console.error(err); }
   };
@@ -175,7 +175,7 @@ export default function UMKMLayout() {
     const token = localStorage.getItem("token");
     if (!token) return;
     try {
-      const res = await fetch("http://localhost:8000/api/umkm/investasi", { headers: { "Authorization": `Bearer ${token}` } });
+      const res = await fetch(`http://localhost:8000/api/umkm/investasi?t=${Date.now()}`, { headers: { "Authorization": `Bearer ${token}` } });
       if (res.ok) setUmkmInvestasis(await res.json());
     } catch (err) { console.error(err); }
   };
@@ -184,10 +184,11 @@ export default function UMKMLayout() {
     const token = localStorage.getItem("token");
     if (!token) return;
     try {
-      const res = await fetch("http://localhost:8000/api/umkm/finance-stats", { headers: { "Authorization": `Bearer ${token}` } });
+      const res = await fetch(`http://localhost:8000/api/umkm/finance-stats?t=${Date.now()}`, { headers: { "Authorization": `Bearer ${token}` } });
       if (res.ok) setFinanceStats(await res.json());
     } catch (err) { console.error(err); }
   };
+
 
   const refreshUmkmData = () => {
     fetchProducts(); fetchOrders(); fetchLoans();

@@ -5,7 +5,8 @@ import { motion } from "framer-motion";
 import { 
   ShoppingBag, Calendar, CreditCard, ChevronRight, 
   Clock, ArrowLeft, CheckCircle2, Package, Truck, 
-  MapPin, User, Phone, Receipt, ExternalLink, ShieldCheck 
+  MapPin, User, Phone, Receipt, ExternalLink, ShieldCheck,
+  Star
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "@/components/ui/Toast";
@@ -21,7 +22,7 @@ export default function PembeliPesananPage() {
     const token = localStorage.getItem("token");
     if (!token) return;
     try {
-      const response = await fetch("http://localhost:8000/api/orders", {
+      const response = await fetch(`http://localhost:8000/api/orders?t=${Date.now()}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (response.ok) {
@@ -36,14 +37,15 @@ export default function PembeliPesananPage() {
         if (pendingDigital.length > 0) {
           Promise.all(
             pendingDigital.map((ord: any) =>
-              fetch(`http://localhost:8000/api/orders/${ord.raw_id}/check-status`, {
+              fetch(`http://localhost:8000/api/orders/${ord.raw_id}/check-status?t=${Date.now()}`, {
                 headers: { Authorization: `Bearer ${token}` }
               }).catch(err => console.error("Sync error:", err))
             )
           ).then(async () => {
-            const freshRes = await fetch("http://localhost:8000/api/orders", {
+            const freshRes = await fetch(`http://localhost:8000/api/orders?t=${Date.now()}`, {
               headers: { Authorization: `Bearer ${token}` }
             });
+
             if (freshRes.ok) {
               const freshData = await freshRes.json();
               setOrders(freshData);
@@ -280,12 +282,18 @@ export default function PembeliPesananPage() {
                           {["Selesai", "success", "completed"].includes(selectedOrder.status) && (
                             <td className="py-3 px-4 text-center">
                               {it.product_id ? (
-                                <button
-                                  onClick={() => navigate(`/pembeli/ulasan?product_id=${it.product_id}`)}
-                                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold py-1 px-2.5 rounded transition text-[10px] uppercase tracking-wider cursor-pointer border-none"
-                                >
-                                  Beri Ulasan
-                                </button>
+                                it.is_reviewed ? (
+                                  <span className="bg-slate-100 text-slate-500 font-extrabold py-1 px-2.5 rounded text-[10px] uppercase tracking-wider">
+                                    Sudah Diulas
+                                  </span>
+                                ) : (
+                                  <button
+                                    onClick={() => navigate(`/pembeli/ulasan?product_id=${it.product_id}`)}
+                                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold py-1 px-2.5 rounded transition text-[10px] uppercase tracking-wider cursor-pointer border-none"
+                                  >
+                                    Beri Ulasan
+                                  </button>
+                                )
                               ) : (
                                 <span className="text-slate-400 font-medium">-</span>
                               )}
@@ -302,12 +310,18 @@ export default function PembeliPesananPage() {
                         {["Selesai", "success", "completed"].includes(selectedOrder.status) && (
                           <td className="py-3 px-4 text-center">
                             {selectedOrder.product_id ? (
-                              <button
-                                onClick={() => navigate(`/pembeli/ulasan?product_id=${selectedOrder.product_id}`)}
-                                className="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold py-1 px-2.5 rounded transition text-[10px] uppercase tracking-wider cursor-pointer border-none"
-                              >
-                                Beri Ulasan
-                              </button>
+                              selectedOrder.is_reviewed ? (
+                                <span className="bg-slate-100 text-slate-500 font-extrabold py-1 px-2.5 rounded text-[10px] uppercase tracking-wider">
+                                  Sudah Diulas
+                                </span>
+                              ) : (
+                                <button
+                                  onClick={() => navigate(`/pembeli/ulasan?product_id=${selectedOrder.product_id}`)}
+                                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold py-1 px-2.5 rounded transition text-[10px] uppercase tracking-wider cursor-pointer border-none"
+                                >
+                                  Beri Ulasan
+                                </button>
+                              )
                             ) : (
                               <span className="text-slate-400 font-medium">-</span>
                             )}
@@ -519,6 +533,12 @@ export default function PembeliPesananPage() {
                     <span className="text-[10px] text-slate-400 font-semibold flex items-center gap-0.5">
                       <Calendar className="w-3.5 h-3.5 text-slate-400" /> {ord.date || "Baru saja"}
                     </span>
+                    {ord.has_unreviewed_items && (
+                      <span className="bg-amber-100 text-amber-800 border border-amber-250/20 text-[9px] font-black uppercase px-2 py-0.5 rounded flex items-center gap-1">
+                        <Star className="w-3 h-3 text-amber-500 fill-current" />
+                        Butuh Ulasan Anda
+                      </span>
+                    )}
                   </div>
                   <p className="text-xs text-slate-600 font-semibold mt-1">Produk: <span className="text-slate-900 font-bold">{ord.product}</span> • Kuantitas: {ord.qty} pcs</p>
                   <p className="text-[10px] text-slate-400 font-semibold flex items-center gap-1">

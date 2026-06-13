@@ -27,6 +27,7 @@ export default function PembeliProdukDetailPage() {
   const [product, setProduct] = useState<any | null>(null);
   const [otherProducts, setOtherProducts] = useState<Product[]>([]);
   const [stores, setStores] = useState<StoreDetail[]>([]);
+  const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Local quantity for adding to cart
@@ -83,6 +84,13 @@ export default function PembeliProdukDetailPage() {
         if (storesRes.ok) {
           const storesData = await storesRes.json();
           setStores(storesData.filter((s: StoreDetail) => s.id !== product?.seller?.id));
+        }
+
+        // Fetch reviews
+        const reviewsRes = await fetch(`http://localhost:8000/api/products/${id}/reviews?t=${Date.now()}`);
+        if (reviewsRes.ok) {
+          const reviewsData = await reviewsRes.json();
+          setReviews(reviewsData);
         }
 
       } catch (err) {
@@ -343,6 +351,71 @@ export default function PembeliProdukDetailPage() {
             {product.seller?.umkm?.description || "Toko Mitra UMKM ini menyuplai produk lokal unggulan kualitas teruji langsung dari desa binaan BUMDes."}
           </p>
         </div>
+      </div>
+
+      {/* Product Reviews Section */}
+      <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/80 shadow-sm space-y-6">
+        <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+          <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
+            <Star className="w-4 h-4 text-amber-500 fill-amber-500" /> Ulasan Produk ({reviews.length})
+          </h3>
+        </div>
+
+        {reviews.length === 0 ? (
+          <div className="text-center py-8 text-xs text-slate-400 font-semibold bg-slate-50/50 rounded-2xl border border-slate-200/50">
+            Belum ada ulasan untuk produk ini.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+            {/* Summary info card */}
+            <div className="md:col-span-4 bg-slate-50 border border-slate-200/60 p-6 rounded-2xl flex flex-col items-center justify-center text-center">
+              <span className="text-4xl font-heading font-black text-slate-900">{product.rating.toFixed(1)}</span>
+              <div className="flex items-center gap-1 my-2 text-amber-400">
+                {Array.from({ length: 5 }).map((_, idx) => (
+                  <Star
+                    key={idx}
+                    className={`w-4 h-4 ${
+                      Math.round(product.rating) >= idx + 1 ? "fill-current" : "text-slate-300"
+                    }`}
+                  />
+                ))}
+              </div>
+              <span className="text-[10px] text-slate-450 font-bold uppercase tracking-wider">Peringkat Kualitas</span>
+            </div>
+
+            {/* Reviews list ledger */}
+            <div className="md:col-span-8 space-y-4 max-h-[350px] overflow-y-auto pr-2">
+              {reviews.map((rev) => {
+                const userInitials = rev.user?.name
+                  ? rev.user.name.split(" ").map((n: string) => n.charAt(0)).join("").substring(0, 2).toUpperCase()
+                  : "AN";
+                return (
+                  <div key={rev.id} className="bg-slate-50/30 p-4 rounded-xl border border-slate-200/50 space-y-2">
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-xs">
+                          {userInitials}
+                        </div>
+                        <div>
+                          <h4 className="text-xs font-black text-slate-800">{rev.user?.name || "Pembeli Anonim"}</h4>
+                          <span className="text-[9px] text-slate-400 font-bold block">{new Date(rev.created_at || Date.now()).toLocaleDateString("id-ID")}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-0.5 text-amber-400">
+                        {Array.from({ length: rev.rating }).map((_, idx) => (
+                          <Star key={idx} className="w-3 h-3 fill-current" />
+                        ))}
+                      </div>
+                    </div>
+                    <p className="text-xs text-slate-600 font-semibold leading-relaxed pl-10">
+                      {rev.review || ""}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Recommended products */}

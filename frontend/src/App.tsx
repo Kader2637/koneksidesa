@@ -20,6 +20,8 @@ import PembeliProdukPage from "./app/(role)/pembeli/produk/page";
 import PembeliProdukDetailPage from "./app/(role)/pembeli/produk/detail/page";
 import PembeliPesananPage from "./app/(role)/pembeli/pesanan/page";
 import PembeliProfilPage from "./app/(role)/pembeli/profil/page";
+import UlasanPage from "./app/(role)/pembeli/ulasan/page";
+
 
 // UMKM
 import UMKMLayout from "./app/(role)/umkm/layout";
@@ -108,6 +110,8 @@ export default function App() {
             <Route path="produk/:id" element={<PembeliProdukDetailPage />} />
             <Route path="pesanan" element={<PembeliPesananPage />} />
             <Route path="profil" element={<PembeliProfilPage />} />
+            <Route path="ulasan" element={<UlasanPage />} />
+
           </Route>
         </Route>
 
